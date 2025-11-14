@@ -19,7 +19,7 @@ DROP TABLE AwardExpiry CASCADE CONSTRAINT;
 DROP TABLE Certification CASCADE CONSTRAINT;
 DROP TABLE Receives CASCADE CONSTRAINT;
 
--- Creating Tables - RAW (NOT EDITED); need to grant public access
+-- Creating Tables - RAW (NOT EDITED)
 
 -- farmer table
 --   1) ContactInfoName(ContactInfo, Name)
@@ -31,6 +31,7 @@ CREATE TABLE ContactInfoName (
   Name         VARCHAR(20)  NOT NULL
 );
 
+grant select on ContactInfoName to public;
 
 -- farmer table
 CREATE TABLE Farmer (
@@ -41,6 +42,7 @@ CREATE TABLE Farmer (
   CONSTRAINT uq_farmer_contact UNIQUE (ContactInfo)
 );
 
+grant select on Farmer to public;
 
 -- owns farm table
 CREATE TABLE OwnsFarm (
@@ -52,6 +54,7 @@ CREATE TABLE OwnsFarm (
     FOREIGN KEY (FarmerID) REFERENCES Farmer(FarmerID)
 );
 
+grant select on OwnsFarm to public;
 
 -- contains field table
 CREATE TABLE ContainsField (
@@ -62,6 +65,7 @@ CREATE TABLE ContainsField (
     FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
 );
 
+grant select on ContainsField to public;
 
 -- grows crop table
 --   1) SeasonByPlantDate(PlantingDate → Season)
@@ -75,6 +79,7 @@ CREATE TABLE SeasonByPlantDate (
   Season       VARCHAR(20) NOT NULL
 );
 
+grant select on SeasonByPlantDate to public;
 
 -- crop type table
 CREATE TABLE CropType (
@@ -85,6 +90,7 @@ CREATE TABLE CropType (
     FOREIGN KEY (PlantingDate) REFERENCES SeasonByPlantDate(PlantingDate)
 );
 
+grant select on CropType to public;
 
 -- grows crop table
 CREATE TABLE GrowsCrop (
@@ -97,6 +103,7 @@ CREATE TABLE GrowsCrop (
     FOREIGN KEY (Name) REFERENCES CropType(Name)
 );
 
+grant select on GrowsCrop to public;
 
 -- grain table (ISA subtype of crop)
 CREATE TABLE Grain (
@@ -107,6 +114,7 @@ CREATE TABLE Grain (
       ON DELETE CASCADE
 );
 
+grant select on Grain to public;
 
 -- vegetable table (ISA subtype of crop)
 CREATE TABLE Vegetable (
@@ -118,6 +126,7 @@ CREATE TABLE Vegetable (
       ON DELETE CASCADE
 );
 
+grant select on Vegetable to public;
 
 -- fruit table (ISA subtype of crop)
 CREATE TABLE Fruit (
@@ -128,17 +137,20 @@ CREATE TABLE Fruit (
       ON DELETE CASCADE
 );
 
+grant select on Fruit to public;
 
 -- crop yield produces table (weak entity)
 CREATE TABLE CropYieldProduces (
-  CropID        INT PRIMARY KEY,
-  Total_Yield   DECIMAL(10,2) NOT NULL,
+  CropID        INT,
+  Total_Yield   DECIMAL(10,2),
   Health_Rating INT NOT NULL,
+  PRIMARY KEY (CropID, Total_Yield),
   CONSTRAINT fk_yield_crop
     FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
       ON DELETE CASCADE
 );
 
+grant select on CropYieldProduces to public;
 
 -- pesticide table
 CREATE TABLE Pesticide (
@@ -146,6 +158,7 @@ CREATE TABLE Pesticide (
   Name    VARCHAR(60)
 );
 
+grant select on Pesticide to public;
 
 -- treats table
 CREATE TABLE Treats (
@@ -160,6 +173,7 @@ CREATE TABLE Treats (
       ON DELETE CASCADE
 );
 
+grant select on Treats to public;
 
 -- irrigation records table
 CREATE TABLE IrrigationRecords (
@@ -171,6 +185,7 @@ CREATE TABLE IrrigationRecords (
     FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
 );
 
+grant select on IrrigationRecords to public;
 
 -- soil records table
 --   1) MoistureByChemistry(SampleDate, pH → Moisture)
@@ -185,6 +200,7 @@ CREATE TABLE MoistureByChemistry (
   PRIMARY KEY (SampleDate, pH)
 );
 
+grant select on MoistureByChemistry to public;
 
 -- soil records table
 CREATE TABLE SoilRecords (
@@ -198,6 +214,7 @@ CREATE TABLE SoilRecords (
     FOREIGN KEY (SampleDate, pH) REFERENCES MoistureByChemistry(SampleDate, pH)
 );
 
+grant select on SoilRecords to public;
 
 -- certification table
 --   1) AwardExpiry(AwardedDate → ExpiryDate)
@@ -210,6 +227,7 @@ CREATE TABLE AwardExpiry (
   ExpiryDate  DATE NOT NULL
 );
 
+grant select on AwardExpiry to public;
 
 -- certification table
 CREATE TABLE Certification (
@@ -220,6 +238,7 @@ CREATE TABLE Certification (
     FOREIGN KEY (AwardedDate) REFERENCES AwardExpiry(AwardedDate)
 );
 
+grant select on Certification to public;
 
 -- receives table
 CREATE TABLE Receives (
@@ -231,6 +250,8 @@ CREATE TABLE Receives (
   CONSTRAINT fk_recv_cert
     FOREIGN KEY (CertID) REFERENCES Certification(CertID)
 );
+
+grant select on Receives to public;
 
 -- Inserts - RAW (NOT EDITED)
 

@@ -40,6 +40,29 @@ async function initializeFarmTables() {
     }
 }
 
+// Populate tables with sql script
+async function populateTables() {
+    const messageElement = document.getElementById("populateMsg");
+    messageElement.textContent = "Populating..."
+
+    const response = await fetch("/populate-tables", {
+        method: "POST"
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.success) {
+        messageElement.textContent = "Tables populated successfully";
+        messageElement.style.color = "green";
+
+        // Refresh data
+        fetchAllTables();
+    } else {
+        messageElement.textContent = "An error has occurred while populating tables";
+        messageElement.style.color = "red";
+    }
+}
+
 // Add new farmer
 async function addFarmer(event) {
     event.preventDefault();
@@ -398,6 +421,24 @@ async function fetchCertifications() {
     });
 }
 
+// Helper function to refresh table gui
+async function fetchAllTables() {
+    await Promise.all([
+        fetchFarmers(),
+        fetchFarms(),
+        fetchFields(),
+        fetchCrops(),
+        fetchPesticides(),
+        fetchCertifications(),
+        fetchGrains(),
+        fetchVegetables(),
+        fetchFruits(),
+        fetchYields(),
+        fetchIrrigation(),
+        fetchSoil()
+    ]);
+}
+
 // Helper function to display table data
 function displayTableData(tableId, data) {
     const tableElement = document.getElementById(tableId);
@@ -538,21 +579,13 @@ window.onload = function() {
     checkDbConnection();
     
     // Auto-load all tables
-    fetchFarmers();
-    fetchFarms();
-    fetchFields();
-    fetchCrops();
-    fetchPesticides();
-    fetchCertifications();
-    fetchGrains();
-    fetchVegetables();
-    fetchFruits();
-    fetchYields();
-    fetchIrrigation();
-    fetchSoil();
+    fetchAllTables();
     
     // Initialization
     document.getElementById("initializeFarmTables").addEventListener("click", initializeFarmTables);
+
+    // Populate
+    document.getElementById("populateTables").addEventListener("click", populateTables);
     
     // Main entity forms
     document.getElementById("addFarmerForm").addEventListener("submit", addFarmer);

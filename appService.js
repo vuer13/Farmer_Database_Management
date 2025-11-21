@@ -1,3 +1,5 @@
+const fs = require("fs").promises;
+
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
 
@@ -75,6 +77,19 @@ async function testOracleConnection() {
     }).catch(() => {
         return false;
     });
+}
+
+// Helper functions
+function splitSqlStatements(sqlfile) {
+    return sqlfile
+      .split(";")
+      .map(s => {
+            return s.split("\n")
+                    .map(line => line.replace(/--.*$/, '').trim())
+                    .filter(line => line.length > 0)
+                    .join(" ");
+        })
+      .filter(s => s.length > 0);
 }
 
 //Farm Management System Functions
@@ -321,6 +336,35 @@ async function initializeFarmTables() {
         return false;
     });
 }
+
+// Populate tables with sql script
+async function populateTables() {
+    return await withOracleDB(async (connection) => {
+        try {
+        const sqlFile = await fs.readFile("project.sql", "utf-8");
+        const statements = splitSqlStatements(sqlFile);
+
+        for (const statement of statements) {
+            try {
+                await connection.execute(statement);
+                await connection.commit();
+            } catch (err) {
+                console.error(`Error executing SQL statement:\n ${statement}\n`, err);
+                return false;
+            }
+        }
+
+        return true;
+        } catch (err) {
+            console.error("Failed to read SQL file or parse statements:", err);
+            return false;
+        }
+    }).catch(() => {
+        return false;
+    });
+    
+}
+
 
 // Fetch functions
 
@@ -765,6 +809,7 @@ async function insertReceives(farmID, certID) {
 module.exports = {
     testOracleConnection,
     initializeFarmTables,
+    populateTables,
     // Fetch functions
     fetchFarmers,
     fetchFarms,

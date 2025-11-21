@@ -28,6 +28,18 @@ router.post("/initialize-farm-tables", async (req, res) => {
     }
 });
 
+
+// Populate tables with sql script
+router.post("/populate-tables", async (req, res) => {
+    const result = await appService.populateTables();
+    if (result) {
+        res.json({ success: true, message: "Populated all tables with sample data" });
+    } else {
+        res.status(500).json({ success: false, message: "Error populating tables" });
+    }
+});
+
+
 // GET functions
 
 router.get('/farmers', async (req, res) => {

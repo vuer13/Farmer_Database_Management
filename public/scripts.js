@@ -265,6 +265,39 @@ async function addCertification(event) {
     }
 }
 
+// Update farm info
+async function updateFarmInfo(event) {
+    event.preventDefault();
+
+    const farmID = document.getElementById('updatefarmID').value;
+    const farmName = document.getElementById('updatefarmName').value;
+    const location = document.getElementById('updatefarmLocation').value;
+    const farmerID = document.getElementById('updatefarmerID').value;
+
+    const response = await fetch('/update-farms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            farmID: farmID,
+            farmName: farmName,
+            location: location,
+            farmerID: farmerID
+        })
+    });
+
+    const responseData = await response.json();
+    const messageElement = document.getElementById('updateFarmMsg');
+    
+    messageElement.textContent = responseData.message;
+    messageElement.style.color = responseData.success ? 'green' : 'red';
+
+    // reset selections and reload table
+    if (responseData.success) {
+        document.getElementById('updateFarmForm').reset();
+        fetchFarms();
+    }
+}
+
 // Fetch and display farmers
 async function fetchFarmers() {
     const tableElement = document.getElementById('farmersTable');
@@ -602,6 +635,9 @@ window.onload = function() {
     document.getElementById("addYieldForm").addEventListener("submit", addYield);
     document.getElementById("addIrrigationForm").addEventListener("submit", addIrrigation);
     document.getElementById("addSoilForm").addEventListener("submit", addSoil);
+
+    // Update forms
+    document.getElementById("updateFarmForm").addEventListener("submit", updateFarmInfo);
     
     // View buttons
     document.getElementById("viewFarmers").addEventListener("click", fetchFarmers);

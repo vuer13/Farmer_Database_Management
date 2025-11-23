@@ -289,5 +289,16 @@ router.post("/add-receives", async (req, res) => {
     }
 });
 
+router.post("/update-farms", async (req, res) => {
+    const { farmID, farmName, location, farmerID } = req.body;
+    const result = await appService.updateFarmInfo(farmID, farmName, location, farmerID);
+    if (result.success) {
+        res.json(result);
+    } else {
+        // client error
+        res.status(400).json(result);
+    }
+})
+
 
 module.exports = router;

@@ -806,6 +806,62 @@ async function insertReceives(farmID, certID) {
     }).catch(() => { return false; });
 }
 
+// Allows transfer of farm to new farmer, or change name/location of farm
+async function updateFarmInfo(farmID, farmName, location, farmerID) {
+    const updates = [];
+    const values = {};
+
+    values.farmID = farmID;
+
+    if (farmName?.trim()) {
+        updates.push("Name = :farmName");
+        values.farmName = farmName;
+    }
+    
+    if (location?.trim()) {
+        updates.push("Location = :location");
+        values.location = location;
+    }
+
+    if (farmerID?.trim()) {
+        updates.push("FarmerID = :farmerID");
+        values.farmerID = farmerID;
+    }
+
+    // Empty fields
+    if (updates.length === 0) {
+        return { success: false, message: "Update fields are all blank. Please check and try again." };
+    }
+
+    const sql = `UPDATE OwnsFarm
+                SET ${updates.join(", ")}
+                WHERE FarmID = :farmID`;
+    
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql, values, {autoCommit: true});
+
+            if (result.rowsAffected === 0) {
+                return { success: false, message: "No farm found with this FarmID. Please check and try again." };
+            }
+
+            return { success: true, message: "Update successful!" };
+        } catch (err) {
+            // foreign key violation (does not exist)
+            if (err.errorNum === 2291) {
+                return { success: false, message: "farmerID not recognized. Please provide a valid existing farmerID." };
+            }
+
+            // log error and return generic err message
+            console.error("Database error:", err);
+            return { success: false, message: "Update failed due to an unexpected error"};
+        }
+    }).catch((err) => {
+        console.error("Database connection failed:", err);
+        return { success: false, message: "Update failed due to an unexpected error" };
+    });
+}
+
 module.exports = {
     testOracleConnection,
     initializeFarmTables,
@@ -845,5 +901,7 @@ module.exports = {
     insertIrrigationRecord,
     insertSoilRecord,
     insertMoistureData,
-    insertReceives
+    insertReceives,
+    // update
+    updateFarmInfo
 };

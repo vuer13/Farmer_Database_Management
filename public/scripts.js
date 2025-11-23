@@ -298,6 +298,31 @@ async function updateFarmInfo(event) {
     }
 }
 
+
+// Fetch joined results (farm/crops)
+async function fetchJoinedFC(event) {
+    event.preventDefault();
+
+    const farmID = document.getElementById('joinfarmID').value;
+    const response = await fetch(`/join-fc_table?farmID=${encodeURIComponent(farmID)}`, {
+        method: 'GET',
+    })
+
+    const responseData = await response.json();
+    const messageElement = document.getElementById('joinFCMsg');
+    
+    messageElement.textContent = responseData.message;
+    messageElement.style.color = responseData.success ? 'green' : 'red';
+
+    if (responseData.success) {
+        const groupedData = groupFarmData(responseData.data);
+        displayTableData('joinfarmTable', groupedData);
+    } else {
+        // Clears table when no results
+        displayTableData('joinFarmTable', []);
+    }
+}
+
 // Fetch and display farmers
 async function fetchFarmers() {
     const tableElement = document.getElementById('farmersTable');
@@ -472,18 +497,56 @@ async function fetchAllTables() {
     ]);
 }
 
-// Helper function to display table data
+/*
+    Helper function to group crops by farm for display
+    Used to process joinFarmCrop results
+ */
+function groupFarmData(rows) {
+    if (!rows || rows.length === 0) {
+        return [];
+    }
+
+    const farmID = rows[0][0];
+    const farmerName = rows[0][1];
+    const contactInfo = rows[0][2];
+    const crops = rows.map(r => r[3]).filter(c => c!== null);
+
+    return [
+        [farmID, farmerName, contactInfo, crops] 
+    ];
+}
+
+// Helper function to display table data, including arrays as bulleted points
 function displayTableData(tableId, data) {
     const tableElement = document.getElementById(tableId);
+    if (!tableElement) return;
+    
     const tableBody = tableElement.querySelector('tbody');
+    if (!tableBody) return;
+
     if (tableBody) {
         tableBody.innerHTML = '';
     }
+
+    if (!data || data.length === 0) return;
+
     data.forEach(row => {
         const tr = tableBody.insertRow();
         row.forEach((cell, index) => {
             const td = tr.insertCell(index);
-            td.textContent = cell;
+
+            if (Array.isArray(cell)) {
+                // Create list
+                const ul = document.createElement('ul');
+                cell.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                });
+                td.appendChild(ul);
+            } else { 
+                td.textContent = cell;
+            }
         });
     });
 }
@@ -611,45 +674,92 @@ async function addSoil(event) {
 window.onload = function() {
     checkDbConnection();
     
-    // Auto-load all tables
-    fetchAllTables();
+    // Auto-load all tables on main page
+    if (window.location.pathname.endsWith("index.html") || window.location.pathname === '/') {
+        fetchAllTables();
+    }
     
     // Initialization
-    document.getElementById("initializeFarmTables").addEventListener("click", initializeFarmTables);
+    const initBtn = document.getElementById("initializeFarmTables");
+    if (initBtn) {
+        initBtn.addEventListener("click", initializeFarmTables);
+    }
 
     // Populate
-    document.getElementById("populateTables").addEventListener("click", populateTables);
+    const populateBtn = document.getElementById("populateTables");
+    if (populateBtn) {
+        populateBtn.addEventListener("click", populateTables);
+    }
     
     // Main entity forms
-    document.getElementById("addFarmerForm").addEventListener("submit", addFarmer);
-    document.getElementById("addFarmForm").addEventListener("submit", addFarm);
-    document.getElementById("addFieldForm").addEventListener("submit", addField);
-    document.getElementById("addCropForm").addEventListener("submit", addCrop);
-    document.getElementById("addPesticideForm").addEventListener("submit", addPesticide);
-    document.getElementById("addCertForm").addEventListener("submit", addCertification);
+    const mainForms = [
+        ["addFarmerForm", addFarmer],
+        ["addFarmForm", addFarm],
+        ["addFieldForm", addField],
+        ["addCropForm", addCrop],
+        ["addPesticideForm", addPesticide],
+        ["addCertForm", addCertification]
+    ];
+
+    // Main entity dispatcher
+    mainForms.forEach(([id, fn]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener("submit", fn);
+        }
+    });
     
     // Additional table forms
-    document.getElementById("addGrainForm").addEventListener("submit", addGrain);
-    document.getElementById("addVegetableForm").addEventListener("submit", addVegetable);
-    document.getElementById("addFruitForm").addEventListener("submit", addFruit);
-    document.getElementById("addYieldForm").addEventListener("submit", addYield);
-    document.getElementById("addIrrigationForm").addEventListener("submit", addIrrigation);
-    document.getElementById("addSoilForm").addEventListener("submit", addSoil);
+    const additionalForms = [
+        ["addGrainForm", addGrain],
+        ["addVegetableForm", addVegetable],
+        ["addFruitForm", addFruit],
+        ["addYieldForm", addYield],
+        ["addIrrigationForm", addIrrigation],
+        ["addSoilForm", addSoil]
+    ];
+
+    // Additional table dispatcher
+    additionalForms.forEach(([id, fn]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener("submit", fn);
+        }
+    });
 
     // Update forms
-    document.getElementById("updateFarmForm").addEventListener("submit", updateFarmInfo);
+    const updateFarm = document.getElementById("updateFarmForm");
+    if (updateFarm) {
+        updateFarm.addEventListener("submit", updateFarmInfo);
+    }
+
+    // Joined forms
+    const joinFC = document.getElementById("joinFCForm");
+    if (joinFC) {
+        joinFC.addEventListener("submit", fetchJoinedFC);
+    }
     
     // View buttons
-    document.getElementById("viewFarmers").addEventListener("click", fetchFarmers);
-    document.getElementById("viewFarms").addEventListener("click", fetchFarms);
-    document.getElementById("viewFields").addEventListener("click", fetchFields);
-    document.getElementById("viewCrops").addEventListener("click", fetchCrops);
-    document.getElementById("viewPesticides").addEventListener("click", fetchPesticides);
-    document.getElementById("viewCertifications").addEventListener("click", fetchCertifications);
-    document.getElementById("viewGrains").addEventListener("click", fetchGrains);
-    document.getElementById("viewVegetables").addEventListener("click", fetchVegetables);
-    document.getElementById("viewFruits").addEventListener("click", fetchFruits);
-    document.getElementById("viewYields").addEventListener("click", fetchYields);
-    document.getElementById("viewIrrigation").addEventListener("click", fetchIrrigation);
-    document.getElementById("viewSoil").addEventListener("click", fetchSoil);
+    const viewBtns = [
+        ["viewFarmers", fetchFarmers],
+        ["viewFarms", fetchFarms],
+        ["viewFields", fetchFields],
+        ["viewCrops", fetchCrops],
+        ["viewPesticides", fetchPesticides],
+        ["viewCertifications", fetchCertifications],
+        ["viewGrains", fetchGrains],
+        ["viewVegetables", fetchVegetables],
+        ["viewFruits", fetchFruits],
+        ["viewYields", fetchYields],
+        ["viewIrrigation", fetchIrrigation],
+        ["viewSoil", fetchSoil]
+    ];
+
+    // View dispatcher
+    viewBtns.forEach((id, fn) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener("click", fn);
+        }
+    });
 };

@@ -137,6 +137,13 @@ router.get('/contactinfo', async (req, res) => {
     res.json({ data: info });
 });
 
+
+router.get('/join-fc_table', async (req, res) => {
+    const farmID = req.query.farmID;
+    const result = await appService.joinFarmCrop(farmID);
+    res.json(result);
+})
+
 // POST functions
 
 router.post("/add-farmer", async (req, res) => {

@@ -839,7 +839,9 @@ async function updateFarmInfo(farmID, farmName, location, farmerID) {
     
     return await withOracleDB(async (connection) => {
         try {
-            const result = await connection.execute(sql, values, {autoCommit: true});
+            const result = await connection.execute(
+                sql,values, { autoCommit: true }
+            );
 
             if (result.rowsAffected === 0) {
                 return { success: false, message: "No farm found with this FarmID. Please check and try again." };
@@ -859,6 +861,54 @@ async function updateFarmInfo(farmID, farmName, location, farmerID) {
     }).catch((err) => {
         console.error("Database connection failed:", err);
         return { success: false, message: "Update failed due to an unexpected error" };
+    });
+}
+
+// Joins farms with the crops they grow
+async function joinFarmCrop(farmID) {
+    // Includes contact info and name even if farm has no crops or fields
+    const sql = `SELECT
+                    f.FarmID,
+                    cin.Name AS FarmerName,
+                    cin.ContactInfo,
+                    ct.Name AS CropName
+                FROM OwnsFarm f
+                JOIN Farmer fr ON f.FarmerID = fr.FarmerID
+                JOIN ContactInfoName cin ON fr.ContactInfo = cin.ContactInfo
+                LEFT JOIN ContainsField fld ON f.farmID = fld.FarmID
+                LEFT JOIN GrowsCrop gc ON fld.FieldID = gc.FieldID
+                LEFT JOIN CropType ct ON gc.Name = ct.Name
+                WHERE f.FarmID = :farmID
+                ORDER BY ct.Name
+                `
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(
+                sql,
+                { farmID }
+            );
+
+            if (result.rows.length == 0) {
+                return {
+                    success: false,
+                    message: "No farm found for this FarmID. Please check and try again.",
+                    data: null
+                };
+            }
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
     });
 }
 
@@ -902,6 +952,8 @@ module.exports = {
     insertSoilRecord,
     insertMoistureData,
     insertReceives,
-    // update
-    updateFarmInfo
+    // Update
+    updateFarmInfo,
+    // Join
+    joinFarmCrop
 };

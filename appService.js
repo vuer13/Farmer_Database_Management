@@ -155,6 +155,7 @@ async function initializeFarmTables() {
                     Area NUMBER,
                     CONSTRAINT fk_field_farm
                         FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+                        ON DELETE CASCADE
                 )
             `);
 
@@ -184,7 +185,8 @@ async function initializeFarmTables() {
                     FieldID NUMBER NOT NULL,
                     Name VARCHAR2(60) NOT NULL,
                     CONSTRAINT fk_crop_field
-                        FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+                        FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+                        ON DELETE CASCADE,
                     CONSTRAINT fk_crop_name
                         FOREIGN KEY (Name) REFERENCES CropType(Name)
                 )
@@ -268,6 +270,7 @@ async function initializeFarmTables() {
                     Volume NUMBER(10,2),
                     CONSTRAINT fk_irrig_field
                         FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+                        ON DELETE CASCADE
                 )
             `);
 
@@ -289,7 +292,8 @@ async function initializeFarmTables() {
                     SampleDate DATE NOT NULL,
                     pH NUMBER(4,2) NOT NULL,
                     CONSTRAINT fk_soil_field
-                        FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+                        FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+                        ON DELETE CASCADE,
                     CONSTRAINT fk_soil_rule
                         FOREIGN KEY (SampleDate, pH) REFERENCES MoistureByChemistry(SampleDate, pH)
                 )
@@ -321,7 +325,8 @@ async function initializeFarmTables() {
                     CertID NUMBER,
                     PRIMARY KEY (FarmID, CertID),
                     CONSTRAINT fk_recv_farm
-                        FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID),
+                        FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+                        ON DELETE CASCADE,
                     CONSTRAINT fk_recv_cert
                         FOREIGN KEY (CertID) REFERENCES Certification(CertID)
                 )
@@ -864,6 +869,28 @@ async function updateFarmInfo(farmID, farmName, location, farmerID) {
     });
 }
 
+// Delete farms
+async function deleteFarmsInfo(farmID) {
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(
+                'DELETE FROM OwnsFarm WHERE FarmID = :farmID', [farmID], { autoCommit: true });
+            
+            if (result.rowsAffected === 0) {
+                return { success: false, message: "No farm found with this FarmID. Please check and try again." };
+            }
+    
+            return { success: true, message: "Cascade Delete successful!" };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Delete failed due to an unexpected error"};
+        }
+    }).catch((err) => {
+        console.error("Database error:", err);
+        return { success: false, message: "Delete failed due to an unexpected error"};
+    })
+};
+
 // Joins farms with the crops they grow
 async function joinFarmCrop(farmID) {
     // Includes contact info and name even if farm has no crops or fields
@@ -955,5 +982,7 @@ module.exports = {
     // Update
     updateFarmInfo,
     // Join
-    joinFarmCrop
+    joinFarmCrop,
+    // Delete
+    deleteFarmsInfo
 };

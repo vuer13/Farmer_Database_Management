@@ -68,7 +68,7 @@
 
     <br><hr><br> <!-- ========================================================================= -->
 
-    <!-- Farms Section (insert + update)-->
+    <!-- Farms Section (insert + update + delete)-->
     <h2>Farms</h2>
     
     <h3>Add New Farm</h3>
@@ -98,6 +98,15 @@
         <button type="submit">Update Farm</button>
     </form>
     <div id="updateFarmMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">Delete Farm</h3>
+    <form id="deleteFarmForm">
+        Farm ID: 
+        <input type="number" id="deleteFarmID" placeholder="e.g., 101" min="1" required> <br><br>
+
+        <button type="submit">Delete Farm</button>
+    </form>
+    <div id="deleteFarmMsg" style="margin-top: 10px; font-weight: bold;"></div>
 
 
     <h3 style="margin-top: 20px;">View All Farms</h3>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+</head>
+<body>
+    <!-- ===================================================================================== -->
+    <!-- Database Connection Status -->
+    <h1>Database Connection Status: 
+        <span id="dbStatus"> </span>
+        <img id="loadingGif" class="loading-gif" src="loading_100px.gif" alt="Loading...">
+    </h1>
+
+    <br><hr><br> <!-- ========================================================================= -->
+    <h1>Farm Management System</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="crops_by_farm.html">Find Crops By Farm</a></li>
+        </ul>
+    </nav>
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <h2>Find crops grown by a specific farm:</h2>
+    <form id="joinFCForm">
+    <label for="joinfarmID">Farm ID:</label>
+    <input type="number" id="joinfarmID" placeholder="e.g., 101" min="1" required>
+    <button type="submit">Search</button>
+    </form>
+    <p id="joinFCMsg"></p>
+
+    <table id="joinfarmTable" border="1">
+        <thead>
+            <tr>
+                <th>Farm ID</th>
+                <th>Farmer Name</th>
+                <th>Contact Info</th>
+                <th>Crops Grown</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- table rows inserted dynamically HERE -->
+        </tbody>
+    </table>
+
+    <!-- ===================================================================================== -->
+    <!-- External JavaScript file that contains the functionality/logic for the operations above. -->
+    <script src="scripts.js"></script>
+</body>
+</html>

@@ -24,44 +24,27 @@
     </nav>
     <br><hr><br> <!-- ========================================================================= -->
 
-    <h2>Find crops grown by a specific farm:</h2>
-    <form id="joinFCForm">
-    <label for="joinfarmID">Farm ID:</label>
-    <input type="number" id="joinfarmID" placeholder="e.g., 101" min="1" required>
-    <button type="submit">Search</button>
+    <h2>Choose what columns you want to see:</h2>
+    <form id="projectionForm" onsubmit="fetchProjection(event)">
+
+        <h3>Choose Projection Columns:</h3>
+
+        <label><input type="checkbox" name="projectionField" value="FarmerID"> Farmer ID</label><br>
+        <label><input type="checkbox" name="projectionField" value="FarmID"> Farm ID</label><br>
+        <label><input type="checkbox" name="projectionField" value="FarmName"> Farm Name</label><br>
+        <label><input type="checkbox" name="projectionField" value="Location"> Location</label><br>
+        <label><input type="checkbox" name="projectionField" value="FieldID"> Field ID</label><br>
+        <label><input type="checkbox" name="projectionField" value="Area"> Area</label><br>
+        <label><input type="checkbox" name="projectionField" value="ContactInfo"> Contact Info</label><br>
+        <label><input type="checkbox" name="projectionField" value="ContactName"> Contact Name</label><br>
+
+        <button type="submit">Run Projection</button>
+
+        <p id="projectionMsg"></p>
     </form>
-    <p id="joinFCMsg"></p>
-
-    <table id="joinfarmTable" border="1">
-        <thead>
-            <tr>
-                <th>Farm ID</th>
-                <th>Farmer Name</th>
-                <th>Contact Info</th>
-                <th>Crops Grown</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- table rows inserted dynamically HERE -->
-        </tbody>
-    </table>
-
-
-    <br><hr><br> <!-- ========================================================================= -->
-    <h2>Field(s) With the Highest Average Soil Moisture</h2>
-
-    <button id="highestMoistureBtn">Show Highest Moisture Field(s)</button>
-    <p id="highestMoistureMsg"></p>
-
-    <table id="highestMoistureF" border="1">
-        <thead>
-            <tr>
-                <th>Field ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- table rows inserted dynamically HERE -->
-        </tbody>
+    <table id="projectionTable" border="1">
+        <thead></thead>
+        <tbody></tbody>
     </table>
 
     <!-- ===================================================================================== -->

@@ -939,6 +939,80 @@ async function joinFarmCrop(farmID) {
     });
 }
 
+// project farms, farmers, fields joined
+async function getFarmersFields(filter) {
+    const contactFields = ["ContactInfo", "ContactName"];
+    const farmerFields = ["FarmerID", "ContactInfo"];
+    const farmFields = ["FarmID", "FarmerID", "FarmName", "Location"];
+    const fieldFields = ["FieldID", "FarmID", "Area"];
+
+    const selectCols = [];
+
+    if (!filter) {
+        return {
+            success: false,
+            message: "No columns selected. Please choose at least one valid field.",
+            data: []
+        };
+    }
+
+    if (filter.display) {
+        const cols = filter.display.split(",");
+
+        cols.forEach(col => {
+            // Contact Table
+            if (col === "ContactInfo")   selectCols.push("f.ContactInfo AS ContactInfo");
+            if (col === "ContactName")   selectCols.push("c.Name AS ContactName");
+
+            // Farmer table
+            if (col === "FarmerID")     selectCols.push("f.FarmerID AS FarmerID");
+
+            // Farm table
+            if (col === "FarmID")       selectCols.push("fm.FarmID AS FarmID");
+            if (col === "FarmName")     selectCols.push("fm.Name AS FarmName");
+            if (col === "Location")     selectCols.push("fm.Location AS Location");
+
+            // Field table
+            if (col === "FieldID")      selectCols.push("fd.FieldID AS FieldID");
+            if (col === "Area")         selectCols.push("fd.Area AS Area");
+        });
+    }
+
+    if (selectCols.length === 0) {
+        return {
+            success: false,
+            message: "None of the selected columns exist. Please choose valid fields.",
+            data: []
+        };
+    }
+
+    const select = `SELECT ${selectCols.join(", ")}`;
+    const from = `FROM Farmer f 
+                JOIN ContactInfoName c ON f.ContactInfo = c.ContactInfo
+                JOIN OwnsFarm fm ON f.FarmerID = fm.FarmerID 
+                JOIN ContainsField fd ON fm.FarmID = fd.FarmID
+                `;
+
+    const query = `${select} ${from}`;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(query);
+            return {
+                success: true,
+                message: 'Projection sucessful!',
+                data: result.rows
+            }
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Projection failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database error:", err);
+        return { success: false, message: "Projection failed due to an unexpected error." };
+    });
+}
+
 
 // fetch fields with highest average soil moisture
 async function fetchHighestMoistureField() {
@@ -1021,5 +1095,7 @@ module.exports = {
     // Delete
     deleteFarmsInfo,
     // Nested
-    fetchHighestMoistureField
+    fetchHighestMoistureField,
+    // Project
+    getFarmersFields
 };

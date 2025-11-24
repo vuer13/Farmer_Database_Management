@@ -326,6 +326,46 @@ async function deleteFarmInfo(event) {
     }
 }
 
+// Fetch projection results
+async function fetchProjection(event) {
+    event.preventDefault();
+
+    const messageElement = document.getElementById('projectionMsg');
+    const selected = [...document.querySelectorAll('input[name="projectionField"]:checked')].map(x => x.value);
+
+    const display = selected.join(",");
+
+    try {
+        const response = await fetch(`/projection?display=${encodeURIComponent(display)}`, {
+            method: 'GET'
+        });
+
+        const responseData = await response.json();
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        if (responseData.success) {
+            const headerRow = document.querySelector("#projectionTable thead");
+            headerRow.innerHTML = "";
+
+            selected.forEach(col => {
+                const th = document.createElement("th");
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            displayTableData('projectionTable', responseData.data);
+        } else {
+            const headerRow = document.querySelector("#projectionTable thead");
+            headerRow.innerHTML = "";
+            displayTableData('projectionTable', []);
+        }
+    } catch (err) {
+        console.error('Error fetching projection:', err);
+        messageElement.textContent = "Error fetching projection data.";
+        messageElement.style.color = 'red';
+    }
+}
 
 // Fetch joined results (farm/crops)
 async function fetchJoinedFC(event) {
@@ -811,6 +851,12 @@ window.onload = function () {
     const joinFC = document.getElementById("joinFCForm");
     if (joinFC) {
         joinFC.addEventListener("submit", fetchJoinedFC);
+    }
+
+    // Projection forms
+    const projectionForm = document.getElementById("projectionForm");
+    if (projectionForm) {
+        projectionForm.addEventListener("submit", fetchProjection);
     }
 
     // View buttons

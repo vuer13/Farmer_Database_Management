@@ -149,6 +149,13 @@ router.get('/highest-moisture-f', async (req, res) => {
     res.json(result);
 })
 
+// Project 
+router.get("/projection", async(req, res) => {
+    const filter = { display: req.query.display };
+    const result = await appService.getFarmersFields(filter);
+    res.json(result);
+})
+
 // POST functions
 
 router.post("/add-farmer", async (req, res) => {
@@ -312,7 +319,7 @@ router.post("/update-farms", async (req, res) => {
     }
 })
 
-// Delete Question
+// Delete 
 router.post("/delete-farms", async (req, res) => {
     const { farmID } = req.body;
     const result = await appService.deleteFarmsInfo(farmID);
@@ -322,6 +329,5 @@ router.post("/delete-farms", async (req, res) => {
         res.status(400).json(result);
     }
 })
-
 
 module.exports = router;

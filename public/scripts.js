@@ -319,6 +319,9 @@ async function deleteFarmInfo(event) {
 
     if (responseData.success) {
         document.getElementById('deleteFarmForm').reset();
+
+        // Wait for cascade and backend to finish
+        await new Promise(resolve => setTimeout(resolve, 200));
         fetchAllTables();
     }
 }

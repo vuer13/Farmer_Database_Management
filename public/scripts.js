@@ -376,7 +376,7 @@ function addCondition() {
 
     if (container.children.length > 0) {
         div.innerHTML += `
-            <select name="connector" class="connector" style="margin-right:10px;">
+            <select name="connector" class="connector">
                 <option value="AND">AND</option>
                 <option value="OR">OR</option>
             </select>
@@ -384,13 +384,13 @@ function addCondition() {
     }
 
     div.innerHTML += `
-        <select name="attribute" style="margin-right:10px;">
+        <select name="attribute">
             <option value="FieldID">FieldID</option>
             <option value="FarmID">FarmID</option>
             <option value="Area">Area</option>
         </select>
 
-        <select name="operator" style="margin-right:10px;">
+        <select name="operator">
             <option value="=">=</option>
             <option value="<>">&lt;&gt;</option>
             <option value=">">&gt;</option>

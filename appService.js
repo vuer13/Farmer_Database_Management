@@ -912,6 +912,41 @@ async function joinFarmCrop(farmID) {
     });
 }
 
+
+// fetch fields with highest average soil moisture
+async function fetchHighestMoistureField() {
+    const sql = `SELECT sr.FieldID
+                FROM SoilRecords sr
+                JOIN MoistureByChemistry mc
+                ON sr.SampleDate = mc.SampleDate AND sr.pH = mc.pH
+                GROUP BY sr.FieldID
+                HAVING AVG(mc.moisture) >= ALL (
+                    SELECT AVG(mc2.moisture)
+                    FROM SoilRecords sr2
+                    JOIN MoistureByChemistry mc2
+                    ON sr2.SampleDate = mc2.SampleDate AND sr2.pH = mc2.pH
+                    GROUP BY sr2.FieldID
+                )
+                `
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
 module.exports = {
     testOracleConnection,
     initializeFarmTables,
@@ -955,5 +990,7 @@ module.exports = {
     // Update
     updateFarmInfo,
     // Join
-    joinFarmCrop
+    joinFarmCrop,
+    // Nested
+    fetchHighestMoistureField
 };

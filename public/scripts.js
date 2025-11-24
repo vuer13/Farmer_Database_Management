@@ -304,22 +304,63 @@ async function fetchJoinedFC(event) {
     event.preventDefault();
 
     const farmID = document.getElementById('joinfarmID').value;
-    const response = await fetch(`/join-fc_table?farmID=${encodeURIComponent(farmID)}`, {
-        method: 'GET',
-    })
-
-    const responseData = await response.json();
     const messageElement = document.getElementById('joinFCMsg');
     
-    messageElement.textContent = responseData.message;
-    messageElement.style.color = responseData.success ? 'green' : 'red';
+    try {
+        const response = await fetch(`/join-fc_table?farmID=${encodeURIComponent(farmID)}`, {
+            method: 'GET'
+        })
+        const responseData = await response.json();
 
-    if (responseData.success) {
-        const groupedData = groupFarmData(responseData.data);
-        displayTableData('joinfarmTable', groupedData);
-    } else {
-        // Clears table when no results
-        displayTableData('joinFarmTable', []);
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        if (responseData.success) {
+            const groupedData = groupFarmData(responseData.data);
+            displayTableData('joinfarmTable', groupedData);
+        } else {
+            // Clears table when no results
+            displayTableData('joinFarmTable', []);
+        }
+    } catch (err) {
+        console.error('Error fetching crops by farm', err);
+        messageElement.textContent = "Error fetching data.";
+        messageElement.style.color = 'red';
+    }
+}
+
+async function fetchHighestMoistureField(event) {
+    if (event) event.preventDefault();
+
+    const tableElement = document.getElementById('highestMoistureF');
+    const tableBody = tableElement.querySelector('tbody');
+    const messageElement = document.getElementById('highestMoistureMsg');
+
+    try {
+        const response = await fetch('/highest-moisture-f', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        const fields = responseData.data;
+
+        // Show message
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        // Clear old data
+        tableBody.innerHTML = '';
+
+        if (responseData.success && fields && fields.length > 0) {
+            displayTableData('highestMoistureF', fields);
+        } else {
+            messageElement.textContent += " No data to display.";
+        }
+    } catch (err) {
+        console.error('Error fetching highest moisture fields:', err);
+        messageElement.textContent = "Error fetching data.";
+        messageElement.style.color = 'red';
+        tableBody.innerHTML = '';
     }
 }
 
@@ -752,11 +793,12 @@ window.onload = function() {
         ["viewFruits", fetchFruits],
         ["viewYields", fetchYields],
         ["viewIrrigation", fetchIrrigation],
-        ["viewSoil", fetchSoil]
+        ["viewSoil", fetchSoil],
+        ["highestMoistureBtn", fetchHighestMoistureField]
     ];
 
     // View dispatcher
-    viewBtns.forEach((id, fn) => {
+    viewBtns.forEach(([id, fn]) => {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener("click", fn);

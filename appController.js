@@ -137,6 +137,18 @@ router.get('/contactinfo', async (req, res) => {
     res.json({ data: info });
 });
 
+
+router.get('/join-fc_table', async (req, res) => {
+    const farmID = req.query.farmID;
+    const result = await appService.joinFarmCrop(farmID);
+    res.json(result);
+})
+
+router.get('/highest-moisture-f', async (req, res) => {
+    const result = await appService.fetchHighestMoistureField();
+    res.json(result);
+})
+
 // POST functions
 
 router.post("/add-farmer", async (req, res) => {
@@ -288,6 +300,17 @@ router.post("/add-receives", async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+
+router.post("/update-farms", async (req, res) => {
+    const { farmID, farmName, location, farmerID } = req.body;
+    const result = await appService.updateFarmInfo(farmID, farmName, location, farmerID);
+    if (result.success) {
+        res.json(result);
+    } else {
+        // client error
+        res.status(400).json(result);
+    }
+})
 
 
 module.exports = router;

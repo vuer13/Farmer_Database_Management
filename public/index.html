@@ -16,6 +16,13 @@
     <br><hr><br> <!-- ========================================================================= -->
 
     <h1>Farm Management System</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="crops_by_farm.html">Find Crops By Farm</a></li>
+        </ul>
+    </nav>
+    <br><hr><br> <!-- ========================================================================= -->
 
     <!-- ===================================================================================== -->
     <!-- Initialize Farm Tables Section -->
@@ -61,18 +68,37 @@
 
     <br><hr><br> <!-- ========================================================================= -->
 
-    <!-- Farms Section -->
+    <!-- Farms Section (insert + update)-->
     <h2>Farms</h2>
     
     <h3>Add New Farm</h3>
     <form id="addFarmForm">
         Farm ID: <input type="number" id="farmID" placeholder="e.g., 101" required> <br><br>
-        Farm Name: <input type="text" id="farmName" placeholder="e.g., Green Valley Farm" required> <br><br>
-        Location: <input type="text" id="farmLocation" placeholder="e.g., Iowa" required> <br><br>
+        Farm Name: <input type="text" id="farmName" placeholder="e.g., Sunny Fields" required> <br><br>
+        Location: <input type="text" id="farmLocation" placeholder="e.g., British Columbia" required> <br><br>
         Farmer ID: <input type="number" id="farmFarmerID" placeholder="e.g., 1" required> <br><br>
         <button type="submit">Add Farm</button>
     </form>
     <div id="farmMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">Update Farm</h3>
+    <form id="updateFarmForm">
+        Farm ID (required): 
+        <input type="number" id="updatefarmID" placeholder="e.g., 101" min="1" required> <br><br>
+
+        Farm Name (optional): 
+        <input type="text" id="updatefarmName" placeholder="e.g., Sunny Fields" maxlength="20"> <br><br>
+
+        Location (optional): 
+        <input type="text" id="updatefarmLocation" placeholder="e.g., British Columbia" maxlength="20"> <br><br>
+
+        Farmer ID (optional): 
+        <input type="number" id="updatefarmerID" placeholder="e.g., 1" min="1"> <br><br>
+
+        <button type="submit">Update Farm</button>
+    </form>
+    <div id="updateFarmMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
 
     <h3 style="margin-top: 20px;">View All Farms</h3>
     <button id="viewFarms">Refresh Farms</button>

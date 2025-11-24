@@ -806,6 +806,147 @@ async function insertReceives(farmID, certID) {
     }).catch(() => { return false; });
 }
 
+// Allows transfer of farm to new farmer, or change name/location of farm
+async function updateFarmInfo(farmID, farmName, location, farmerID) {
+    const updates = [];
+    const values = {};
+
+    values.farmID = farmID;
+
+    if (farmName?.trim()) {
+        updates.push("Name = :farmName");
+        values.farmName = farmName;
+    }
+    
+    if (location?.trim()) {
+        updates.push("Location = :location");
+        values.location = location;
+    }
+
+    if (farmerID?.trim()) {
+        updates.push("FarmerID = :farmerID");
+        values.farmerID = farmerID;
+    }
+
+    // Empty fields
+    if (updates.length === 0) {
+        return { success: false, message: "Update fields are all blank. Please check and try again." };
+    }
+
+    const sql = `UPDATE OwnsFarm
+                SET ${updates.join(", ")}
+                WHERE FarmID = :farmID`;
+    
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(
+                sql,values, { autoCommit: true }
+            );
+
+            if (result.rowsAffected === 0) {
+                return { success: false, message: "No farm found with this FarmID. Please check and try again." };
+            }
+
+            return { success: true, message: "Update successful!" };
+        } catch (err) {
+            // foreign key violation (does not exist)
+            if (err.errorNum === 2291) {
+                return { success: false, message: "farmerID not recognized. Please provide a valid existing farmerID." };
+            }
+
+            // log error and return generic err message
+            console.error("Database error:", err);
+            return { success: false, message: "Update failed due to an unexpected error"};
+        }
+    }).catch((err) => {
+        console.error("Database connection failed:", err);
+        return { success: false, message: "Update failed due to an unexpected error" };
+    });
+}
+
+// Joins farms with the crops they grow
+async function joinFarmCrop(farmID) {
+    // Includes contact info and name even if farm has no crops or fields
+    const sql = `SELECT
+                    f.FarmID,
+                    cin.Name AS FarmerName,
+                    cin.ContactInfo,
+                    ct.Name AS CropName
+                FROM OwnsFarm f
+                JOIN Farmer fr ON f.FarmerID = fr.FarmerID
+                JOIN ContactInfoName cin ON fr.ContactInfo = cin.ContactInfo
+                LEFT JOIN ContainsField fld ON f.farmID = fld.FarmID
+                LEFT JOIN GrowsCrop gc ON fld.FieldID = gc.FieldID
+                LEFT JOIN CropType ct ON gc.Name = ct.Name
+                WHERE f.FarmID = :farmID
+                ORDER BY ct.Name
+                `
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(
+                sql,
+                { farmID }
+            );
+
+            if (result.rows.length == 0) {
+                return {
+                    success: false,
+                    message: "No farm found for this FarmID. Please check and try again.",
+                    data: null
+                };
+            }
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
+
+// fetch fields with highest average soil moisture
+async function fetchHighestMoistureField() {
+    const sql = `SELECT sr.FieldID
+                FROM SoilRecords sr
+                JOIN MoistureByChemistry mc
+                ON sr.SampleDate = mc.SampleDate AND sr.pH = mc.pH
+                GROUP BY sr.FieldID
+                HAVING AVG(mc.moisture) >= ALL (
+                    SELECT AVG(mc2.moisture)
+                    FROM SoilRecords sr2
+                    JOIN MoistureByChemistry mc2
+                    ON sr2.SampleDate = mc2.SampleDate AND sr2.pH = mc2.pH
+                    GROUP BY sr2.FieldID
+                )
+                `
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
 module.exports = {
     testOracleConnection,
     initializeFarmTables,
@@ -845,5 +986,11 @@ module.exports = {
     insertIrrigationRecord,
     insertSoilRecord,
     insertMoistureData,
-    insertReceives
+    insertReceives,
+    // Update
+    updateFarmInfo,
+    // Join
+    joinFarmCrop,
+    // Nested
+    fetchHighestMoistureField
 };

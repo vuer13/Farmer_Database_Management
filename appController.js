@@ -330,4 +330,14 @@ router.post("/delete-farms", async (req, res) => {
     }
 })
 
+// Selection
+router.post("/selection", async (req, res) => {
+    const result = await appService.selectFields(req.body);
+    if (result.success) {
+        res.json(result);
+    } else {
+        res.status(400).json(result);
+    }
+})
+
 module.exports = router;

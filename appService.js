@@ -996,6 +996,78 @@ async function getFields(filter) {
     });
 }
 
+// Select fields based on different criteria user specifies
+async function selectFields(filter) {
+    const validAttributes = ["FieldID", "FarmID", "Area"];
+    const validOperators = ["=", "<>", ">", "<", ">=", "<="];
+    const validConnectors = ["AND", "OR"];
+
+    let whereParts = [];
+    let binds = {};
+
+    filter.conditions.forEach((cond, idx) => {
+        const attr = cond.attribute;
+        const op = cond.operator;
+        const val = cond.value;
+        const join = cond.connector;
+
+        if (!validAttributes.includes(attr)) return;
+        if (!validOperators.includes(op)) return;
+        if (idx > 0 && !validConnectors.includes(join)) return;
+
+        const bindKey = `v${idx}`;
+        binds[bindKey] = val;
+
+        const clause = `${attr} ${op} :${bindKey}`;
+
+        if (idx === 0) {
+            whereParts.push(clause);
+        } else {
+            whereParts.push(`${join} ${clause}`);
+        }
+    });
+
+    if (whereParts.length === 0) {
+        const sql = `SELECT FieldID, FarmID, Area FROM ContainsField`;
+        return await withOracleDB(async (connection) => {
+            try {
+                const result = await connection.execute(sql);
+                return {
+                    success: true,
+                    message: "Selection successful!",
+                    data: result.rows
+                };
+            } catch (err) {
+                console.error("Selection SQL error:", err);
+                return { success: false, message: "Selection failed due to an unexpected error." };
+            }
+        });
+    }
+
+    const where = "WHERE " + whereParts.join(" ");
+    const sql = `SELECT FieldID, FarmID, Area
+                FROM ContainsField
+                ${where}
+                `;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql, binds);
+            return {
+                success: true,
+                message: 'Selection sucessful!',
+                data: result.rows
+            }
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Selection failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database error:", err);
+        return { success: false, message: "Selection failed due to an unexpected error." };
+    });
+}
+
 
 // fetch fields with highest average soil moisture
 async function fetchHighestMoistureField() {
@@ -1080,5 +1152,7 @@ module.exports = {
     // Nested
     fetchHighestMoistureField,
     // Project
-    getFields
+    getFields,
+    // Select
+    selectFields
 };

@@ -367,13 +367,109 @@ async function fetchProjection(event) {
     }
 }
 
+// adds condition for selections
+function addCondition() {
+    const container = document.getElementById("conditionsContainer");
+
+    const div = document.createElement("div");
+    div.className = "conditionRow";
+
+    if (container.children.length > 0) {
+        div.innerHTML += `
+            <select name="connector" class="connector" style="margin-right:10px;">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+            </select>
+        `;
+    }
+
+    div.innerHTML += `
+        <select name="attribute" style="margin-right:10px;">
+            <option value="FieldID">FieldID</option>
+            <option value="FarmID">FarmID</option>
+            <option value="Area">Area</option>
+        </select>
+
+        <select name="operator" style="margin-right:10px;">
+            <option value="=">=</option>
+            <option value="<>">&lt;&gt;</option>
+            <option value=">">&gt;</option>
+            <option value="<">&lt;</option>
+            <option value=">=">&gt;=</option>
+            <option value="<=">&lt;=</option>
+        </select>
+
+        <input type="number" name="value" placeholder="Number" min="1" required>
+    `;
+
+
+    container.appendChild(div);
+}
+
+// Fetch selection
+async function fetchSelection(event) {
+    event.preventDefault();
+
+    const rows = document.querySelectorAll(".conditionRow");
+    const conditions = [];
+
+    rows.forEach((row, idx) => {
+        const attribute = row.querySelector('select[name="attribute"]').value;
+        const operator = row.querySelector('select[name="operator"]').value;
+        const value = row.querySelector('input[name="value"]').value;
+
+        let connector = "AND";
+        if (idx > 0) {
+            connector = row.querySelector('select[name="connector"]').value;
+        }
+
+        if (value !== "") {
+            conditions.push({ attribute, operator, value, connector });
+        }
+    });
+
+    try {
+        const response = await fetch(`/selection`, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ conditions })
+        });
+
+        const responseData = await response.json();
+        const messageElement = document.getElementById("selectionMsg");
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        const headerRow = document.querySelector("#selectionTable thead tr");
+        headerRow.innerHTML = "";
+        const tableBody = document.querySelector("#selectionTable tbody");
+        tableBody.innerHTML = "";
+
+        if (responseData.success) {
+            ["FieldID", "FarmID", "Area"].forEach(col => {
+                const th = document.createElement("th");
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            displayTableData('selectionTable', responseData.data);
+        } else {
+            displayTableData('selectionTable', []);
+        }
+    } catch (err) {
+        console.error('Error fetching selection:', err);
+        messageElement.textContent = "Error fetching selection data.";
+        messageElement.style.color = 'red';
+    }
+}
+
 // Fetch joined results (farm/crops)
 async function fetchJoinedFC(event) {
     event.preventDefault();
 
     const farmID = document.getElementById('joinfarmID').value;
     const messageElement = document.getElementById('joinFCMsg');
-    
+
     try {
         const response = await fetch(`/join-fc_table?farmID=${encodeURIComponent(farmID)}`, {
             method: 'GET'
@@ -857,6 +953,12 @@ window.onload = function () {
     const projectionForm = document.getElementById("projectionForm");
     if (projectionForm) {
         projectionForm.addEventListener("submit", fetchProjection);
+    }
+
+    // Selection forms
+    const selectionFrom = document.getElementById("selectionForm");
+    if (selectionForm) {
+        selectionFrom.addEventListener("submit", fetchSelection);
     }
 
     // View buttons

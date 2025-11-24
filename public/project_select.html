@@ -41,6 +41,26 @@
         <thead></thead>
         <tbody></tbody>
     </table>
+    
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <h2>Selection on ContainsFields</h2>
+    <p>Please note: SQL will perform all AND operations before OR operations</p>
+    <form id="selectionForm" onsubmit="fetchSelection(event)">
+
+        <div id="conditionsContainer"></div>
+
+        <button type="button" onclick="addCondition()">Add Condition</button>
+        <button type="submit">Run Selection</button>
+
+        <p id="selectionMsg"></p>
+
+    </form>
+
+    <table id="selectionTable" border="1">
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+    </table>
 
     <!-- ===================================================================================== -->
     <!-- External JavaScript file that contains the functionality/logic for the operations above. -->

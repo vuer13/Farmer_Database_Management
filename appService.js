@@ -1019,7 +1019,7 @@ module.exports = {
     // Join
     joinFarmCrop,
     // Delete
-    deleteFarmsInfo
+    deleteFarmsInfo,
     // Nested
     fetchHighestMoistureField
 };

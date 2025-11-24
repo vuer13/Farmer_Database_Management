@@ -12,25 +12,25 @@ async function checkDbConnection() {
     statusElem.style.display = 'inline';
 
     response.text()
-    .then((text) => {
-        statusElem.textContent = text;
-    })
-    .catch((error) => {
-        statusElem.textContent = 'connection timed out';
-    });
+        .then((text) => {
+            statusElem.textContent = text;
+        })
+        .catch((error) => {
+            statusElem.textContent = 'connection timed out';
+        });
 }
 
 // Initialize tables
 async function initializeFarmTables() {
     const messageElement = document.getElementById('farmInitMsg');
     messageElement.textContent = 'Initializing tables...';
-    
+
     const response = await fetch('/initialize-farm-tables', {
         method: 'POST'
     });
-    
+
     const responseData = await response.json();
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Farm tables initialized successfully! Now you can add entities.';
         messageElement.style.color = 'green';
@@ -66,11 +66,11 @@ async function populateTables() {
 // Add new farmer
 async function addFarmer(event) {
     event.preventDefault();
-    
+
     const farmerID = document.getElementById('farmerID').value;
     const farmerName = document.getElementById('farmerName').value;
     const farmerContact = document.getElementById('farmerContact').value;
-    
+
     const response = await fetch('/add-farmer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,10 +80,10 @@ async function addFarmer(event) {
             contactInfo: farmerContact
         })
     });
-    
+
     const responseData = await response.json();
     const messageElement = document.getElementById('farmerMsg');
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Farmer added successfully!';
         messageElement.style.color = 'green';
@@ -98,12 +98,12 @@ async function addFarmer(event) {
 // Add new farm
 async function addFarm(event) {
     event.preventDefault();
-    
+
     const farmID = document.getElementById('farmID').value;
     const farmName = document.getElementById('farmName').value;
     const farmLocation = document.getElementById('farmLocation').value;
     const farmFarmerID = document.getElementById('farmFarmerID').value;
-    
+
     const response = await fetch('/add-farm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -114,10 +114,10 @@ async function addFarm(event) {
             farmerID: farmFarmerID
         })
     });
-    
+
     const responseData = await response.json();
     const messageElement = document.getElementById('farmMsg');
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Farm added successfully!';
         messageElement.style.color = 'green';
@@ -132,11 +132,11 @@ async function addFarm(event) {
 // Add new field
 async function addField(event) {
     event.preventDefault();
-    
+
     const fieldID = document.getElementById('fieldID').value;
     const fieldFarmID = document.getElementById('fieldFarmID').value;
     const fieldArea = document.getElementById('fieldArea').value;
-    
+
     const response = await fetch('/add-field', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -146,10 +146,10 @@ async function addField(event) {
             area: fieldArea || null
         })
     });
-    
+
     const responseData = await response.json();
     const messageElement = document.getElementById('fieldMsg');
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Field added successfully!';
         messageElement.style.color = 'green';
@@ -164,14 +164,14 @@ async function addField(event) {
 // Add new crop
 async function addCrop(event) {
     event.preventDefault();
-    
+
     const cropID = document.getElementById('cropID').value;
     const cropFieldID = document.getElementById('cropFieldID').value;
     const cropName = document.getElementById('cropName').value;
     const cropPlantDate = document.getElementById('cropPlantDate').value;
     const cropHarvestDate = document.getElementById('cropHarvestDate').value;
     const cropSeason = document.getElementById('cropSeason').value;
-    
+
     const response = await fetch('/add-crop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -184,10 +184,10 @@ async function addCrop(event) {
             season: cropSeason
         })
     });
-    
+
     const responseData = await response.json();
     const messageElement = document.getElementById('cropMsg');
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Crop added successfully!';
         messageElement.style.color = 'green';
@@ -202,10 +202,10 @@ async function addCrop(event) {
 // Add new pesticide
 async function addPesticide(event) {
     event.preventDefault();
-    
+
     const pestID = document.getElementById('pestID').value;
     const pestName = document.getElementById('pestName').value;
-    
+
     const response = await fetch('/add-pesticide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -214,10 +214,10 @@ async function addPesticide(event) {
             name: pestName
         })
     });
-    
+
     const responseData = await response.json();
     const messageElement = document.getElementById('pestMsg');
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Pesticide added successfully!';
         messageElement.style.color = 'green';
@@ -232,13 +232,13 @@ async function addPesticide(event) {
 // Add new certification
 async function addCertification(event) {
     event.preventDefault();
-    
+
     const certID = document.getElementById('certID').value;
     const certName = document.getElementById('certName').value;
     const certAwardDate = document.getElementById('certAwardDate').value;
     const certExpiryDate = document.getElementById('certExpiryDate').value;
     const certFarmID = document.getElementById('certFarmID').value;
-    
+
     const response = await fetch('/add-certification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -250,10 +250,10 @@ async function addCertification(event) {
             farmID: certFarmID
         })
     });
-    
+
     const responseData = await response.json();
     const messageElement = document.getElementById('certMsg');
-    
+
     if (responseData.success) {
         messageElement.textContent = 'Certification added successfully!';
         messageElement.style.color = 'green';
@@ -287,7 +287,7 @@ async function updateFarmInfo(event) {
 
     const responseData = await response.json();
     const messageElement = document.getElementById('updateFarmMsg');
-    
+
     messageElement.textContent = responseData.message;
     messageElement.style.color = responseData.success ? 'green' : 'red';
 
@@ -295,6 +295,31 @@ async function updateFarmInfo(event) {
     if (responseData.success) {
         document.getElementById('updateFarmForm').reset();
         fetchFarms();
+    }
+}
+
+// Delete Farms
+async function deleteFarmInfo(event) {
+    event.preventDefault();
+
+    const farmID = document.getElementById('deleteFarmID').value;
+    const deleteMessage = document.getElementById('deleteFarmMsg');
+
+    const response = await fetch('/delete-farms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            farmID: farmID
+        })
+    });
+
+    const responseData = await response.json();
+    deleteMessage.textContent = responseData.message;
+    deleteMessage.style.color = responseData.success ? 'green' : 'red';
+
+    if (responseData.success) {
+        document.getElementById('deleteFarmForm').reset();
+        fetchAllTables();
     }
 }
 
@@ -311,7 +336,6 @@ async function fetchJoinedFC(event) {
             method: 'GET'
         })
         const responseData = await response.json();
-
 
         messageElement.textContent = responseData.message;
         messageElement.style.color = responseData.success ? 'green' : 'red';
@@ -368,19 +392,19 @@ async function fetchHighestMoistureField(event) {
 async function fetchFarmers() {
     const tableElement = document.getElementById('farmersTable');
     const tableBody = tableElement.querySelector('tbody');
-    
+
     const response = await fetch('/farmers', {
         method: 'GET'
     });
-    
+
     const responseData = await response.json();
     const farmers = responseData.data;
-    
+
     // Clear old data
     if (tableBody) {
         tableBody.innerHTML = '';
     }
-    
+
     farmers.forEach(farmer => {
         const row = tableBody.insertRow();
         farmer.forEach((field, index) => {
@@ -394,19 +418,19 @@ async function fetchFarmers() {
 async function fetchFarms() {
     const tableElement = document.getElementById('farmsTable');
     const tableBody = tableElement.querySelector('tbody');
-    
+
     const response = await fetch('/farms', {
         method: 'GET'
     });
-    
+
     const responseData = await response.json();
     const farms = responseData.data;
-    
+
     // Clear old data
     if (tableBody) {
         tableBody.innerHTML = '';
     }
-    
+
     farms.forEach(farm => {
         const row = tableBody.insertRow();
         farm.forEach((field, index) => {
@@ -420,19 +444,19 @@ async function fetchFarms() {
 async function fetchFields() {
     const tableElement = document.getElementById('fieldsTable');
     const tableBody = tableElement.querySelector('tbody');
-    
+
     const response = await fetch('/fields', {
         method: 'GET'
     });
-    
+
     const responseData = await response.json();
     const fields = responseData.data;
-    
+
     // Clear old data
     if (tableBody) {
         tableBody.innerHTML = '';
     }
-    
+
     fields.forEach(field => {
         const row = tableBody.insertRow();
         field.forEach((fieldData, index) => {
@@ -446,19 +470,19 @@ async function fetchFields() {
 async function fetchCrops() {
     const tableElement = document.getElementById('cropsTable');
     const tableBody = tableElement.querySelector('tbody');
-    
+
     const response = await fetch('/crops', {
         method: 'GET'
     });
-    
+
     const responseData = await response.json();
     const crops = responseData.data;
-    
+
     // Clear old data
     if (tableBody) {
         tableBody.innerHTML = '';
     }
-    
+
     crops.forEach(crop => {
         const row = tableBody.insertRow();
         crop.forEach((field, index) => {
@@ -472,19 +496,19 @@ async function fetchCrops() {
 async function fetchPesticides() {
     const tableElement = document.getElementById('pesticidesTable');
     const tableBody = tableElement.querySelector('tbody');
-    
+
     const response = await fetch('/pesticides', {
         method: 'GET'
     });
-    
+
     const responseData = await response.json();
     const pesticides = responseData.data;
-    
+
     // Clear old data
     if (tableBody) {
         tableBody.innerHTML = '';
     }
-    
+
     pesticides.forEach(pesticide => {
         const row = tableBody.insertRow();
         pesticide.forEach((field, index) => {
@@ -498,19 +522,19 @@ async function fetchPesticides() {
 async function fetchCertifications() {
     const tableElement = document.getElementById('certificationsTable');
     const tableBody = tableElement.querySelector('tbody');
-    
+
     const response = await fetch('/certifications', {
         method: 'GET'
     });
-    
+
     const responseData = await response.json();
     const certifications = responseData.data;
-    
+
     // Clear old data
     if (tableBody) {
         tableBody.innerHTML = '';
     }
-    
+
     certifications.forEach(cert => {
         const row = tableBody.insertRow();
         cert.forEach((field, index) => {
@@ -550,10 +574,10 @@ function groupFarmData(rows) {
     const farmID = rows[0][0];
     const farmerName = rows[0][1];
     const contactInfo = rows[0][2];
-    const crops = rows.map(r => r[3]).filter(c => c!== null);
+    const crops = rows.map(r => r[3]).filter(c => c !== null);
 
     return [
-        [farmID, farmerName, contactInfo, crops] 
+        [farmID, farmerName, contactInfo, crops]
     ];
 }
 
@@ -561,7 +585,7 @@ function groupFarmData(rows) {
 function displayTableData(tableId, data) {
     const tableElement = document.getElementById(tableId);
     if (!tableElement) return;
-    
+
     const tableBody = tableElement.querySelector('tbody');
     if (!tableBody) return;
 
@@ -585,7 +609,7 @@ function displayTableData(tableId, data) {
                     ul.appendChild(li);
                 });
                 td.appendChild(ul);
-            } else { 
+            } else {
                 td.textContent = cell;
             }
         });
@@ -712,14 +736,14 @@ async function addSoil(event) {
 
 // Initialize webpage on load
 // ---------------------------------------------------------------
-window.onload = function() {
+window.onload = function () {
     checkDbConnection();
-    
+
     // Auto-load all tables on main page
     if (window.location.pathname.endsWith("index.html") || window.location.pathname === '/') {
         fetchAllTables();
     }
-    
+
     // Initialization
     const initBtn = document.getElementById("initializeFarmTables");
     if (initBtn) {
@@ -731,7 +755,7 @@ window.onload = function() {
     if (populateBtn) {
         populateBtn.addEventListener("click", populateTables);
     }
-    
+
     // Main entity forms
     const mainForms = [
         ["addFarmerForm", addFarmer],
@@ -749,7 +773,7 @@ window.onload = function() {
             element.addEventListener("submit", fn);
         }
     });
-    
+
     // Additional table forms
     const additionalForms = [
         ["addGrainForm", addGrain],
@@ -774,12 +798,18 @@ window.onload = function() {
         updateFarm.addEventListener("submit", updateFarmInfo);
     }
 
+    // Delete forms
+    const deleteFarm = document.getElementById("deleteFarmForm");
+    if (deleteFarm) {
+        deleteFarm.addEventListener("submit", deleteFarmInfo);
+    }
+
     // Joined forms
     const joinFC = document.getElementById("joinFCForm");
     if (joinFC) {
         joinFC.addEventListener("submit", fetchJoinedFC);
     }
-    
+
     // View buttons
     const viewBtns = [
         ["viewFarmers", fetchFarmers],

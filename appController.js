@@ -312,5 +312,16 @@ router.post("/update-farms", async (req, res) => {
     }
 })
 
+// Delete Question
+router.post("/delete-farms", async (req, res) => {
+    const { farmID } = req.body;
+    const result = await appService.deleteFarmsInfo(farmID);
+    if (result.success) {
+        res.json(result);
+    } else {
+        res.status(400).json(result);
+    }
+})
+
 
 module.exports = router;

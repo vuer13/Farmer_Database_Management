@@ -939,11 +939,8 @@ async function joinFarmCrop(farmID) {
     });
 }
 
-// project farms, farmers, fields joined
-async function getFarmersFields(filter) {
-    const contactFields = ["ContactInfo", "ContactName"];
-    const farmerFields = ["FarmerID", "ContactInfo"];
-    const farmFields = ["FarmID", "FarmerID", "FarmName", "Location"];
+// project Fields joined
+async function getFields(filter) {
     const fieldFields = ["FieldID", "FarmID", "Area"];
 
     const selectCols = [];
@@ -960,19 +957,8 @@ async function getFarmersFields(filter) {
         const cols = filter.display.split(",");
 
         cols.forEach(col => {
-            // Contact Table
-            if (col === "ContactInfo")   selectCols.push("f.ContactInfo AS ContactInfo");
-            if (col === "ContactName")   selectCols.push("c.Name AS ContactName");
-
-            // Farmer table
-            if (col === "FarmerID")     selectCols.push("f.FarmerID AS FarmerID");
-
-            // Farm table
-            if (col === "FarmID")       selectCols.push("fm.FarmID AS FarmID");
-            if (col === "FarmName")     selectCols.push("fm.Name AS FarmName");
-            if (col === "Location")     selectCols.push("fm.Location AS Location");
-
             // Field table
+            if (col === "FarmID")       selectCols.push("fd.FarmID AS FarmID");
             if (col === "FieldID")      selectCols.push("fd.FieldID AS FieldID");
             if (col === "Area")         selectCols.push("fd.Area AS Area");
         });
@@ -987,10 +973,7 @@ async function getFarmersFields(filter) {
     }
 
     const select = `SELECT ${selectCols.join(", ")}`;
-    const from = `FROM Farmer f 
-                JOIN ContactInfoName c ON f.ContactInfo = c.ContactInfo
-                JOIN OwnsFarm fm ON f.FarmerID = fm.FarmerID 
-                JOIN ContainsField fd ON fm.FarmID = fd.FarmID
+    const from = `FROM ContainsField fd 
                 `;
 
     const query = `${select} ${from}`;
@@ -1097,5 +1080,5 @@ module.exports = {
     // Nested
     fetchHighestMoistureField,
     // Project
-    getFarmersFields
+    getFields
 };

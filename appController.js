@@ -152,7 +152,7 @@ router.get('/highest-moisture-f', async (req, res) => {
 // Project 
 router.get("/projection", async(req, res) => {
     const filter = { display: req.query.display };
-    const result = await appService.getFarmersFields(filter);
+    const result = await appService.getFields(filter);
     res.json(result);
 })
 

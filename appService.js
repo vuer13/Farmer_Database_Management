@@ -2,6 +2,7 @@ const fs = require("fs").promises;
 
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
+const validate = require('./validation');
 
 const envVariables = loadEnvFile('./.env');
 
@@ -563,6 +564,11 @@ async function fetchContactInfo() {
 // Insert functions
 
 async function insertFarmer(farmerID, name, contactInfo) {
+    if (!validate.isPositiveInteger(farmerID) || 
+        !validate.isValidString(name, 20) || 
+        !validate.isValidEmail(contactInfo)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         try {
             // Insert ContactInfoName
@@ -590,6 +596,12 @@ async function insertFarmer(farmerID, name, contactInfo) {
 }
 
 async function insertFarm(farmID, name, location, farmerID) {
+    if (!validate.isPositiveInteger(farmID) || 
+        !validate.isValidString(name, 20) || 
+        !validate.isValidString(location, 20) || 
+        !validate.isPositiveInteger(farmerID)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO OwnsFarm VALUES (:farmID, :name, :location, :farmerID)`,
@@ -603,6 +615,11 @@ async function insertFarm(farmID, name, location, farmerID) {
 }
 
 async function insertField(fieldID, farmID, area) {
+    if (!validate.isPositiveInteger(fieldID) || 
+        !validate.isPositiveInteger(farmID) || 
+        (area !== null && area !== undefined && !validate.isNonNegativeNumber(area))) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO ContainsField VALUES (:fieldID, :farmID, :area)`,
@@ -616,6 +633,18 @@ async function insertField(fieldID, farmID, area) {
 }
 
 async function insertCrop(cropID, fieldID, cropName, plantDate, harvestDate, season) {
+    if (!validate.isPositiveInteger(cropID) || 
+        !validate.isPositiveInteger(fieldID) || 
+        !validate.isValidString(cropName, 60) || 
+        !validate.isValidDate(plantDate) || 
+        !validate.isValidDate(harvestDate) || 
+        !validate.isValidString(season, 20)) {
+        return false;
+    }
+    // Harvest must be after planting
+    if (new Date(harvestDate) <= new Date(plantDate)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         try {
             // Insert SeasonByPlantDate
@@ -660,6 +689,10 @@ async function insertCrop(cropID, fieldID, cropName, plantDate, harvestDate, sea
 }
 
 async function insertPesticide(pestID, name) {
+    if (!validate.isPositiveInteger(pestID) || 
+        !validate.isValidString(name, 60)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO Pesticide VALUES (:pestID, :name)`,
@@ -673,6 +706,17 @@ async function insertPesticide(pestID, name) {
 }
 
 async function insertCertification(certID, name, awardDate, expiryDate, farmID) {
+    if (!validate.isPositiveInteger(certID) || 
+        !validate.isValidString(name, 80) || 
+        !validate.isValidDate(awardDate) || 
+        !validate.isValidDate(expiryDate) || 
+        !validate.isPositiveInteger(farmID)) {
+        return false;
+    }
+    // Expiry must be after award
+    if (new Date(expiryDate) <= new Date(awardDate)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         try {
             // Insert AwardExpiry
@@ -713,6 +757,10 @@ async function insertCertification(certID, name, awardDate, expiryDate, farmID) 
 }
 
 async function insertGrain(cropID, glutenContent) {
+    if (!validate.isPositiveInteger(cropID) || 
+        (glutenContent !== null && glutenContent !== undefined && !validate.isNonNegativeNumber(glutenContent))) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO Grain VALUES (:cropID, :glutenContent)`,
@@ -724,6 +772,10 @@ async function insertGrain(cropID, glutenContent) {
 }
 
 async function insertVegetable(cropID, isLeafy) {
+    if (!validate.isPositiveInteger(cropID) || 
+        !validate.isValidBoolean(isLeafy)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO Vegetable VALUES (:cropID, :isLeafy)`,
@@ -735,6 +787,10 @@ async function insertVegetable(cropID, isLeafy) {
 }
 
 async function insertFruit(cropID, sugarContent) {
+    if (!validate.isPositiveInteger(cropID) || 
+        (sugarContent !== null && sugarContent !== undefined && !validate.isNonNegativeNumber(sugarContent))) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO Fruit VALUES (:cropID, :sugarContent)`,
@@ -746,6 +802,11 @@ async function insertFruit(cropID, sugarContent) {
 }
 
 async function insertCropYield(cropID, totalYield, healthRating) {
+    if (!validate.isPositiveInteger(cropID) || 
+        !validate.isNonNegativeNumber(totalYield) || 
+        !validate.isValidHealthRating(healthRating)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO CropYieldProduces VALUES (:cropID, :totalYield, :healthRating)`,
@@ -757,6 +818,10 @@ async function insertCropYield(cropID, totalYield, healthRating) {
 }
 
 async function insertTreatment(cropID, pestID) {
+    if (!validate.isPositiveInteger(cropID) || 
+        !validate.isPositiveInteger(pestID)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO Treats VALUES (:cropID, :pestID)`,
@@ -768,6 +833,12 @@ async function insertTreatment(cropID, pestID) {
 }
 
 async function insertIrrigationRecord(irrigID, fieldID, eventDate, volume) {
+    if (!validate.isPositiveInteger(irrigID) || 
+        !validate.isPositiveInteger(fieldID) || 
+        (eventDate && !validate.isValidDate(eventDate)) || 
+        (volume !== null && volume !== undefined && !validate.isNonNegativeNumber(volume))) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO IrrigationRecords VALUES (:irrigID, :fieldID, TO_DATE(:eventDate, 'YYYY-MM-DD'), :volume)`,
@@ -779,6 +850,12 @@ async function insertIrrigationRecord(irrigID, fieldID, eventDate, volume) {
 }
 
 async function insertSoilRecord(soilCondID, fieldID, sampleDate, pH) {
+    if (!validate.isPositiveInteger(soilCondID) || 
+        !validate.isPositiveInteger(fieldID) || 
+        !validate.isValidDate(sampleDate) || 
+        !validate.isValidpH(pH)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO SoilRecords VALUES (:soilCondID, :fieldID, TO_DATE(:sampleDate, 'YYYY-MM-DD'), :pH)`,
@@ -790,6 +867,11 @@ async function insertSoilRecord(soilCondID, fieldID, sampleDate, pH) {
 }
 
 async function insertMoistureData(sampleDate, pH, moisture) {
+    if (!validate.isValidDate(sampleDate) || 
+        !validate.isValidpH(pH) || 
+        !validate.isNonNegativeNumber(moisture)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO MoistureByChemistry VALUES (TO_DATE(:sampleDate, 'YYYY-MM-DD'), :pH, :moisture)`,
@@ -801,6 +883,10 @@ async function insertMoistureData(sampleDate, pH, moisture) {
 }
 
 async function insertReceives(farmID, certID) {
+    if (!validate.isPositiveInteger(farmID) || 
+        !validate.isPositiveInteger(certID)) {
+        return false;
+    }
     return await withOracleDB(async (connection) => {
         const result = await connection.execute(
             `INSERT INTO Receives VALUES (:farmID, :certID)`,
@@ -813,22 +899,36 @@ async function insertReceives(farmID, certID) {
 
 // Allows transfer of farm to new farmer, or change name/location of farm
 async function updateFarmInfo(farmID, farmName, location, farmerID) {
+    // Validate farmID is required and positive
+    if (!validate.isPositiveInteger(farmID)) {
+        return { success: false, message: "Invalid Farm ID. Must be a positive integer." };
+    }
+
     const updates = [];
     const values = {};
 
     values.farmID = farmID;
 
     if (farmName?.trim()) {
+        if (!validate.isValidString(farmName, 20)) {
+            return { success: false, message: "Invalid farm name. Must be 1-20 characters." };
+        }
         updates.push("Name = :farmName");
         values.farmName = farmName;
     }
     
     if (location?.trim()) {
+        if (!validate.isValidString(location, 20)) {
+            return { success: false, message: "Invalid location. Must be 1-20 characters." };
+        }
         updates.push("Location = :location");
         values.location = location;
     }
 
     if (farmerID?.trim()) {
+        if (!validate.isPositiveInteger(farmerID)) {
+            return { success: false, message: "Invalid Farmer ID. Must be a positive integer." };
+        }
         updates.push("FarmerID = :farmerID");
         values.farmerID = farmerID;
     }
@@ -871,6 +971,9 @@ async function updateFarmInfo(farmID, farmName, location, farmerID) {
 
 // Delete farms
 async function deleteFarmsInfo(farmID) {
+    if (!validate.isPositiveInteger(farmID)) {
+        return { success: false, message: "Invalid Farm ID. Must be a positive integer." };
+    }
     return await withOracleDB(async (connection) => {
         try {
             const result = await connection.execute(
@@ -893,6 +996,9 @@ async function deleteFarmsInfo(farmID) {
 
 // Joins farms with the crops they grow
 async function joinFarmCrop(farmID) {
+    if (!validate.isPositiveInteger(farmID)) {
+        return { success: false, message: "Invalid Farm ID. Must be a positive integer.", data: null };
+    }
     // Includes contact info and name even if farm has no crops or fields
     const sql = `SELECT
                     f.FarmID,

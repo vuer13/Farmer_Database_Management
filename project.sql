@@ -99,15 +99,37 @@ INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-05
 INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-06-25', 6.2, 20.0);
 INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-07-30', 7.5, 15.0);
 INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-08-15', 6.9, 19.5);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-09-01', 6.0, 28.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-09-15', 6.5, 24.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-10-05', 7.2, 30.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-10-20', 6.8, 27.5);
 
 
 -- SoilRecords
+-- Field 1001
 INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (1, 1001, DATE '2023-03-15', 6.5);
 INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (2, 1001, DATE '2023-04-20', 7.0);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (3, 1002, DATE '2023-05-10', 5.8);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (4, 1002, DATE '2023-06-25', 6.2);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (5, 1003, DATE '2023-07-30', 7.5);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (6, 1003, DATE '2023-08-15', 6.9);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (3, 1001, DATE '2023-10-05', 7.2);
+
+-- Field 1002
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (4, 1002, DATE '2023-05-10', 5.8);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (5, 1002, DATE '2023-06-25', 6.2);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (6, 1002, DATE '2023-10-20', 6.8);
+
+-- Field 1003
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (7, 1003, DATE '2023-07-30', 7.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (8, 1003, DATE '2023-08-15', 6.9);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (9, 1003, DATE '2023-09-01', 6.0);
+
+-- Field 1004
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (10, 1004, DATE '2023-09-15', 6.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (11, 1004, DATE '2023-10-05', 7.2);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (12, 1004, DATE '2023-10-20', 6.8);
+
+-- Field 1005
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (13, 1005, DATE '2023-09-01', 6.0);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (14, 1005, DATE '2023-09-15', 6.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (15, 1005, DATE '2023-10-05', 7.2);
 
 
 -- AwardExpiry

@@ -144,6 +144,11 @@ router.get('/join-fc_table', async (req, res) => {
     res.json(result);
 })
 
+router.get('/highest-moisture-f', async (req, res) => {
+    const result = await appService.fetchHighestMoistureField();
+    res.json(result);
+})
+
 // POST functions
 
 router.post("/add-farmer", async (req, res) => {

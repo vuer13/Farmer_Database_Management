@@ -957,13 +957,14 @@ async function getFields(filter) {
         const cols = filter.display.split(",");
 
         cols.forEach(col => {
-            // Field table
+            // ContainsField table
             if (col === "FarmID")       selectCols.push("fd.FarmID AS FarmID");
             if (col === "FieldID")      selectCols.push("fd.FieldID AS FieldID");
             if (col === "Area")         selectCols.push("fd.Area AS Area");
         });
     }
 
+    // Error handling, 0 features chosen send error
     if (selectCols.length === 0) {
         return {
             success: false,
@@ -1027,6 +1028,7 @@ async function selectFields(filter) {
         }
     });
 
+    // Select the whole table if no restrictions apply
     if (whereParts.length === 0) {
         const sql = `SELECT FieldID, FarmID, Area FROM ContainsField`;
         return await withOracleDB(async (connection) => {

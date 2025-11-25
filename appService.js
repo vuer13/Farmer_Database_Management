@@ -974,6 +974,42 @@ async function fetchHighestMoistureField() {
     });
 }
 
+// Gets the fields that uses all the pesticides
+async function fetchFieldsAllPesticides() {
+    const sql = `SELECT cf.FieldID
+                FROM ContainsField cf
+                WHERE NOT EXISTS (
+                    (SELECT p.pestID
+                    FROM Pesticide p)
+
+                    MINUS
+
+                    (SELECT t.PestID
+                    FROM GrowsCrop gc
+                    JOIN Treats t ON gc.CropID = t.CropID
+                    WHERE gc.FieldID = cf.FieldID
+                    )
+                )
+                `
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
 module.exports = {
     testOracleConnection,
     initializeFarmTables,
@@ -1021,5 +1057,7 @@ module.exports = {
     // Delete
     deleteFarmsInfo,
     // Nested
-    fetchHighestMoistureField
+    fetchHighestMoistureField,
+    // Division
+    fetchFieldsAllPesticides
 };

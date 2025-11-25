@@ -956,9 +956,9 @@ window.onload = function () {
     }
 
     // Selection forms
-    const selectionFrom = document.getElementById("selectionForm");
+    const selectionForm = document.getElementById("selectionForm");
     if (selectionForm) {
-        selectionFrom.addEventListener("submit", fetchSelection);
+        selectionForm.addEventListener("submit", fetchSelection);
     }
 
     // View buttons

@@ -76,12 +76,24 @@ INSERT INTO Pesticide(PestID, Name) VALUES (5, 'Get Outta Here Pests');
 INSERT INTO Pesticide(PestID, Name) VALUES (6, 'Pest Eliminator 3000');
 
 
+-- Treat Crops With Pesticide
 INSERT INTO Treats(CropID, PestID) VALUES (201, 1);
 INSERT INTO Treats(CropID, PestID) VALUES (201, 2);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 3);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 4);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 5);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 6);
+
 INSERT INTO Treats(CropID, PestID) VALUES (202, 1);
 INSERT INTO Treats(CropID, PestID) VALUES (202, 3);
 INSERT INTO Treats(CropID, PestID) VALUES (203, 2);
+
+INSERT INTO Treats(CropID, PestID) VALUES (205, 1);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 2);
 INSERT INTO Treats(CropID, PestID) VALUES (205, 3);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 4);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 5);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 6);
 
 
 -- IrrigationRecords

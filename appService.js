@@ -1099,6 +1099,37 @@ async function fetchAverageVolume() {
     });
 }
 
+// fetch all fields that have a healthy average pH
+async function fetchHealthyFields() {
+    const sql = `SELECT s.FieldID, o.Name, AVG(s.pH) as AvgpH
+                FROM SoilRecords s
+                JOIN ContainsField f ON f.FieldID = s.FieldID
+                JOIN OwnsFarm o ON o.FarmID = f.FarmID
+                GROUP BY o.Name, s.FieldID
+                HAVING AVG(s.pH) BETWEEN 5.5 AND 7.5
+                ORDER BY s.FieldID ASC
+                `;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
+
 // fetch fields with highest average soil moisture
 async function fetchHighestMoistureField() {
     const sql = `SELECT sr.FieldID
@@ -1186,5 +1217,7 @@ module.exports = {
     // Select
     selectFields,
     // Group By
-    fetchAverageVolume
+    fetchAverageVolume,
+    // Having
+    fetchHealthyFields
 };

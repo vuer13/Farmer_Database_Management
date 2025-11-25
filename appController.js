@@ -154,6 +154,11 @@ router.get('/average-irrigation', async (req, res) => {
     res.json(result);
 })
 
+router.get('/healthy-field', async (req, res) => {
+    const result = await appService.fetchHealthyFields();
+    res.json(result);
+})
+
 // Project 
 router.get("/projection", async(req, res) => {
     const filter = { display: req.query.display };

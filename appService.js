@@ -1070,6 +1070,34 @@ async function selectFields(filter) {
     });
 }
 
+// find the average volume for each field
+async function fetchAverageVolume() {
+    const sql = `SELECT i.FieldID, o.Name, AVG(i.Volume) as AvgVolume
+                FROM IrrigationRecords i
+                JOIN ContainsField f ON f.FieldID = i.FieldID
+                JOIN OwnsFarm o ON o.FarmID = f.FarmID
+                GROUP BY o.Name, i.FieldID
+                ORDER BY i.FieldID ASC
+                `;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
 
 // fetch fields with highest average soil moisture
 async function fetchHighestMoistureField() {
@@ -1156,5 +1184,7 @@ module.exports = {
     // Project
     getFields,
     // Select
-    selectFields
+    selectFields,
+    // Group By
+    fetchAverageVolume
 };

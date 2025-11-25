@@ -149,6 +149,11 @@ router.get('/highest-moisture-f', async (req, res) => {
     res.json(result);
 })
 
+router.get('/average-irrigation', async (req, res) => {
+    const result = await appService.fetchAverageVolume();
+    res.json(result);
+})
+
 // Project 
 router.get("/projection", async(req, res) => {
     const filter = { display: req.query.display };

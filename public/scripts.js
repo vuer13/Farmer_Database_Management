@@ -493,6 +493,38 @@ async function fetchJoinedFC(event) {
     }
 }
 
+async function fetchAverageVolumes(event) {
+    event.preventDefault();
+
+    const tableElement = document.getElementById('averageVolumeTable');
+    const tableBody = tableElement.querySelector('tbody');
+    const messageElement = document.getElementById('averageVolumeMsg');
+
+    try {
+        const response = await fetch('/average-irrigation', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        const fields = responseData.data;
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        tableBody.innerHTML = '';
+
+        if (responseData.success && fields && fields.length > 0) {
+            displayTableData('averageVolumeTable', fields);
+        } else {
+            messageElement.textContent += " No data to display.";
+        }
+    } catch (err) {
+        console.error('Error fetching average irrigation per field:', err);
+        messageElement.textContent = "Error fetching data.";
+        messageElement.style.color = 'red';
+        tableBody.innerHTML = '';
+    }
+}
+
 async function fetchHighestMoistureField(event) {
     if (event) event.preventDefault();
 
@@ -975,7 +1007,8 @@ window.onload = function () {
         ["viewYields", fetchYields],
         ["viewIrrigation", fetchIrrigation],
         ["viewSoil", fetchSoil],
-        ["highestMoistureBtn", fetchHighestMoistureField]
+        ["highestMoistureBtn", fetchHighestMoistureField],
+        ["averageVolume", fetchAverageVolumes]
     ];
 
     // View dispatcher

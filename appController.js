@@ -149,6 +149,11 @@ router.get('/highest-moisture-f', async (req, res) => {
     res.json(result);
 })
 
+router.get('/all-pesticides', async (req, res) => {
+    const result = await appService.fetchFieldsAllPesticides();
+    res.json(result);
+})
+
 // POST functions
 
 router.post("/add-farmer", async (req, res) => {

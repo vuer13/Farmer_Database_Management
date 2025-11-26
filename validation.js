@@ -49,6 +49,7 @@ function isValidPercentage(value) {
     return !isNaN(num) && num >= 0 && num <= 100;
 }
 
+// Exports (test commit)
 module.exports = {
     isPositiveInteger,
     isNonNegativeNumber,

@@ -591,6 +591,40 @@ async function fetchHighestMoistureField(event) {
     }
 }
 
+async function fetchFieldsAllPesticides(event) {
+    if (event) event.preventDefault();
+
+    const tableElement = document.getElementById('allPesticideTable');
+    const tableBody = tableElement.querySelector('tbody');
+    const messageElement = document.getElementById('allPesticideMsg');
+
+    try {
+        const response = await fetch('/all-pesticides', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        const fields = responseData.data;
+
+        // Show message
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        // Clear old data
+        tableBody.innerHTML = '';
+
+        if (responseData.success && fields && fields.length > 0) {
+            displayTableData('allPesticideTable', fields);
+        } else {
+            messageElement.textContent += " No data to display.";
+        }
+    } catch (err) {
+        console.error('Error fetching fields that use all pesticides:', err);
+        messageElement.textContent = "Error fetching data.";
+        messageElement.style.color = 'red';
+        tableBody.innerHTML = '';
+    }
+}
+
 // Fetch and display farmers
 async function fetchFarmers() {
     const tableElement = document.getElementById('farmersTable');
@@ -1041,7 +1075,8 @@ window.onload = function () {
         ["viewSoil", fetchSoil],
         ["highestMoistureBtn", fetchHighestMoistureField],
         ["averageVolume", fetchAverageVolumes],
-        ["healthyFields", fetchHealthyField]
+        ["healthyFields", fetchHealthyField],
+        ["allPesticideBtn", fetchFieldsAllPesticides]
     ];
 
     // View dispatcher

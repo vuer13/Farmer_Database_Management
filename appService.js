@@ -939,6 +939,196 @@ async function joinFarmCrop(farmID) {
     });
 }
 
+// project Fields joined
+async function getFields(filter) {
+    const fieldFields = ["FieldID", "FarmID", "Area"];
+
+    const selectCols = [];
+
+    if (!filter) {
+        return {
+            success: false,
+            message: "No columns selected. Please choose at least one valid field.",
+            data: []
+        };
+    }
+
+    if (filter.display) {
+        const cols = filter.display.split(",");
+
+        cols.forEach(col => {
+            // ContainsField table
+            if (col === "FarmID")       selectCols.push("fd.FarmID AS FarmID");
+            if (col === "FieldID")      selectCols.push("fd.FieldID AS FieldID");
+            if (col === "Area")         selectCols.push("fd.Area AS Area");
+        });
+    }
+
+    // Error handling, 0 features chosen send error
+    if (selectCols.length === 0) {
+        return {
+            success: false,
+            message: "None of the selected columns exist. Please choose valid fields.",
+            data: []
+        };
+    }
+
+    const select = `SELECT ${selectCols.join(", ")}`;
+    const from = `FROM ContainsField fd 
+                `;
+
+    const query = `${select} ${from}`;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(query);
+            return {
+                success: true,
+                message: 'Projection sucessful!',
+                data: result.rows
+            }
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Projection failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database error:", err);
+        return { success: false, message: "Projection failed due to an unexpected error." };
+    });
+}
+
+// Select fields based on different criteria user specifies
+async function selectFields(filter) {
+    const validAttributes = ["FieldID", "FarmID", "Area"];
+    const validOperators = ["=", "<>", ">", "<", ">=", "<="];
+    const validConnectors = ["AND", "OR"];
+
+    let whereParts = [];
+    let binds = {};
+
+    filter.conditions.forEach((cond, idx) => {
+        const attr = cond.attribute;
+        const op = cond.operator;
+        const val = cond.value;
+        const join = cond.connector;
+
+        if (!validAttributes.includes(attr)) return;
+        if (!validOperators.includes(op)) return;
+        if (idx > 0 && !validConnectors.includes(join)) return;
+
+        const bindKey = `v${idx}`;
+        binds[bindKey] = val;
+
+        const clause = `${attr} ${op} :${bindKey}`;
+
+        if (idx === 0) {
+            whereParts.push(clause);
+        } else {
+            whereParts.push(`${join} ${clause}`);
+        }
+    });
+
+    // Select the whole table if no restrictions apply
+    if (whereParts.length === 0) {
+        const sql = `SELECT FieldID, FarmID, Area FROM ContainsField`;
+        return await withOracleDB(async (connection) => {
+            try {
+                const result = await connection.execute(sql);
+                return {
+                    success: true,
+                    message: "Selection successful!",
+                    data: result.rows
+                };
+            } catch (err) {
+                console.error("Selection SQL error:", err);
+                return { success: false, message: "Selection failed due to an unexpected error." };
+            }
+        });
+    }
+
+    const where = "WHERE " + whereParts.join(" ");
+    const sql = `SELECT FieldID, FarmID, Area
+                FROM ContainsField
+                ${where}
+                `;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql, binds);
+            return {
+                success: true,
+                message: 'Selection sucessful!',
+                data: result.rows
+            }
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Selection failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database error:", err);
+        return { success: false, message: "Selection failed due to an unexpected error." };
+    });
+}
+
+// find the average volume for each field
+async function fetchAverageVolume() {
+    const sql = `SELECT i.FieldID, o.Name, AVG(i.Volume) as AvgVolume
+                FROM IrrigationRecords i
+                JOIN ContainsField f ON f.FieldID = i.FieldID
+                JOIN OwnsFarm o ON o.FarmID = f.FarmID
+                GROUP BY o.Name, i.FieldID
+                ORDER BY i.FieldID ASC
+                `;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
+// fetch all fields that have a healthy average pH
+async function fetchHealthyFields() {
+    const sql = `SELECT s.FieldID, o.Name, AVG(s.pH) as AvgpH
+                FROM SoilRecords s
+                JOIN ContainsField f ON f.FieldID = s.FieldID
+                JOIN OwnsFarm o ON o.FarmID = f.FarmID
+                GROUP BY o.Name, s.FieldID
+                HAVING AVG(s.pH) BETWEEN 5.5 AND 7.5
+                ORDER BY s.FieldID ASC
+                `;
+
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(sql);
+
+            return {
+                success: true,
+                message: "Search successful!",
+                data: result.rows
+            };
+        } catch (err) {
+            console.error("Database error:", err);
+            return { success: false, message: "Query failed due to an unexpected error." };
+        }
+    }).catch((err) => {
+        console.error("Database connection failed", err);
+        return { success: false, message: "Query failed due to an unexpected error." };
+    });
+}
+
 
 // fetch fields with highest average soil moisture
 async function fetchHighestMoistureField() {
@@ -1058,6 +1248,14 @@ module.exports = {
     deleteFarmsInfo,
     // Nested
     fetchHighestMoistureField,
+    // Project
+    getFields,
+    // Select
+    selectFields,
+    // Group By
+    fetchAverageVolume,
+    // Having
+    fetchHealthyFields,
     // Division
     fetchFieldsAllPesticides
 };

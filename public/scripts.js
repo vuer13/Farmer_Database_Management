@@ -319,10 +319,149 @@ async function deleteFarmInfo(event) {
 
     if (responseData.success) {
         document.getElementById('deleteFarmForm').reset();
+
+        // Wait for cascade and backend to finish
+        await new Promise(resolve => setTimeout(resolve, 200));
         fetchAllTables();
     }
 }
 
+// Fetch projection results
+async function fetchProjection(event) {
+    event.preventDefault();
+
+    const messageElement = document.getElementById('projectionMsg');
+    const selected = [...document.querySelectorAll('input[name="projectionField"]:checked')].map(x => x.value);
+
+    const display = selected.join(",");
+
+    try {
+        const response = await fetch(`/projection?display=${encodeURIComponent(display)}`, {
+            method: 'GET'
+        });
+
+        const responseData = await response.json();
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        if (responseData.success) {
+            const headerRow = document.querySelector("#projectionTable thead");
+            headerRow.innerHTML = "";
+
+            selected.forEach(col => {
+                const th = document.createElement("th");
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            displayTableData('projectionTable', responseData.data);
+        } else {
+            const headerRow = document.querySelector("#projectionTable thead");
+            headerRow.innerHTML = "";
+            displayTableData('projectionTable', []);
+        }
+    } catch (err) {
+        console.error('Error fetching projection:', err);
+        messageElement.textContent = "Error fetching projection data.";
+        messageElement.style.color = 'red';
+    }
+}
+
+// adds condition for selections
+function addCondition() {
+    const container = document.getElementById("conditionsContainer");
+
+    const div = document.createElement("div");
+    div.className = "conditionRow";
+
+    if (container.children.length > 0) {
+        div.innerHTML += `
+            <select name="connector" class="connector">
+                <option value="AND">AND</option>
+                <option value="OR">OR</option>
+            </select>
+        `;
+    }
+
+    div.innerHTML += `
+        <select name="attribute">
+            <option value="FieldID">FieldID</option>
+            <option value="FarmID">FarmID</option>
+            <option value="Area">Area</option>
+        </select>
+
+        <select name="operator">
+            <option value="=">=</option>
+            <option value="<>">&lt;&gt;</option>
+            <option value=">">&gt;</option>
+            <option value="<">&lt;</option>
+            <option value=">=">&gt;=</option>
+            <option value="<=">&lt;=</option>
+        </select>
+
+        <input type="number" name="value" placeholder="Number" min="1" required>
+    `;
+
+
+    container.appendChild(div);
+}
+
+// Fetch selection
+async function fetchSelection(event) {
+    event.preventDefault();
+
+    const rows = document.querySelectorAll(".conditionRow");
+    const conditions = [];
+
+    rows.forEach((row, idx) => {
+        const attribute = row.querySelector('select[name="attribute"]').value;
+        const operator = row.querySelector('select[name="operator"]').value;
+        const value = row.querySelector('input[name="value"]').value;
+
+        let connector = "AND";
+        if (idx > 0) {
+            connector = row.querySelector('select[name="connector"]').value;
+        }
+
+        if (value !== "") {
+            conditions.push({ attribute, operator, value, connector });
+        }
+    });
+
+    try {
+        const response = await fetch(`/selection`, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ conditions })
+        });
+
+        const responseData = await response.json();
+        const messageElement = document.getElementById("selectionMsg");
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        const headerRow = document.querySelector("#selectionTable thead tr");
+        headerRow.innerHTML = "";
+        const tableBody = document.querySelector("#selectionTable tbody");
+        tableBody.innerHTML = "";
+
+        if (responseData.success) {
+            ["FieldID", "FarmID", "Area"].forEach(col => {
+                const th = document.createElement("th");
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            displayTableData('selectionTable', responseData.data);
+        } else {
+            displayTableData('selectionTable', []);
+        }
+    } catch (err) {
+        console.error('Error fetching selection:', err);
+        messageElement.textContent = "Error fetching selection data.";
+        messageElement.style.color = 'red';
+    }
+}
 
 // Fetch joined results (farm/crops)
 async function fetchJoinedFC(event) {
@@ -330,7 +469,7 @@ async function fetchJoinedFC(event) {
 
     const farmID = document.getElementById('joinfarmID').value;
     const messageElement = document.getElementById('joinFCMsg');
-    
+
     try {
         const response = await fetch(`/join-fc_table?farmID=${encodeURIComponent(farmID)}`, {
             method: 'GET'
@@ -351,6 +490,70 @@ async function fetchJoinedFC(event) {
         console.error('Error fetching crops by farm', err);
         messageElement.textContent = "Error fetching data.";
         messageElement.style.color = 'red';
+    }
+}
+
+async function fetchAverageVolumes(event) {
+    event.preventDefault();
+
+    const tableElement = document.getElementById('averageVolumeTable');
+    const tableBody = tableElement.querySelector('tbody');
+    const messageElement = document.getElementById('averageVolumeMsg');
+
+    try {
+        const response = await fetch('/average-irrigation', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        const fields = responseData.data;
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        tableBody.innerHTML = '';
+
+        if (responseData.success && fields && fields.length > 0) {
+            displayTableData('averageVolumeTable', fields);
+        } else {
+            messageElement.textContent += " No data to display.";
+        }
+    } catch (err) {
+        console.error('Error fetching average irrigation per field:', err);
+        messageElement.textContent = "Error fetching data.";
+        messageElement.style.color = 'red';
+        tableBody.innerHTML = '';
+    }
+}
+
+async function fetchHealthyField(event) {
+    event.preventDefault();
+
+    const tableElement = document.getElementById('healthyFieldTable');
+    const tableBody = tableElement.querySelector('tbody');
+    const messageElement = document.getElementById('healthyFieldMsg');
+
+    try {
+        const response = await fetch('/healthy-field', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        const fields = responseData.data;
+
+        messageElement.textContent = responseData.message;
+        messageElement.style.color = responseData.success ? 'green' : 'red';
+
+        tableBody.innerHTML = '';
+
+        if (responseData.success && fields && fields.length > 0) {
+            displayTableData('healthyFieldTable', fields);
+        } else {
+            messageElement.textContent += " No data to display.";
+        }
+    } catch (err) {
+        console.error('Error fetching average irrigation per field:', err);
+        messageElement.textContent = "Error fetching data.";
+        messageElement.style.color = 'red';
+        tableBody.innerHTML = '';
     }
 }
 
@@ -844,6 +1047,18 @@ window.onload = function () {
         joinFC.addEventListener("submit", fetchJoinedFC);
     }
 
+    // Projection forms
+    const projectionForm = document.getElementById("projectionForm");
+    if (projectionForm) {
+        projectionForm.addEventListener("submit", fetchProjection);
+    }
+
+    // Selection forms
+    const selectionForm = document.getElementById("selectionForm");
+    if (selectionForm) {
+        selectionForm.addEventListener("submit", fetchSelection);
+    }
+
     // View buttons
     const viewBtns = [
         ["viewFarmers", fetchFarmers],
@@ -859,6 +1074,8 @@ window.onload = function () {
         ["viewIrrigation", fetchIrrigation],
         ["viewSoil", fetchSoil],
         ["highestMoistureBtn", fetchHighestMoistureField],
+        ["averageVolume", fetchAverageVolumes],
+        ["healthyFields", fetchHealthyField],
         ["allPesticideBtn", fetchFieldsAllPesticides]
     ];
 

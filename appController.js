@@ -149,6 +149,21 @@ router.get('/highest-moisture-f', async (req, res) => {
     res.json(result);
 })
 
+router.get('/average-irrigation', async (req, res) => {
+    const result = await appService.fetchAverageVolume();
+    res.json(result);
+})
+
+router.get('/healthy-field', async (req, res) => {
+    const result = await appService.fetchHealthyFields();
+    res.json(result);
+})
+
+// Project 
+router.get("/projection", async(req, res) => {
+    const filter = { display: req.query.display };
+    const result = await appService.getFields(filter);
+
 router.get('/all-pesticides', async (req, res) => {
     const result = await appService.fetchFieldsAllPesticides();
     res.json(result);
@@ -317,7 +332,7 @@ router.post("/update-farms", async (req, res) => {
     }
 })
 
-// Delete Question
+// Delete 
 router.post("/delete-farms", async (req, res) => {
     const { farmID } = req.body;
     const result = await appService.deleteFarmsInfo(farmID);
@@ -328,5 +343,14 @@ router.post("/delete-farms", async (req, res) => {
     }
 })
 
+// Selection
+router.post("/selection", async (req, res) => {
+    const result = await appService.selectFields(req.body);
+    if (result.success) {
+        res.json(result);
+    } else {
+        res.status(400).json(result);
+    }
+})
 
 module.exports = router;

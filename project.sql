@@ -1,3 +1,242 @@
+DROP TABLE Receives CASCADE CONSTRAINTS;
+DROP TABLE Certification CASCADE CONSTRAINTS;
+DROP TABLE AwardExpiry CASCADE CONSTRAINTS;
+
+DROP TABLE SoilRecords CASCADE CONSTRAINTS;
+DROP TABLE MoistureByChemistry CASCADE CONSTRAINTS;
+
+DROP TABLE IrrigationRecords CASCADE CONSTRAINTS;
+
+DROP TABLE Treats CASCADE CONSTRAINTS;
+DROP TABLE Pesticide CASCADE CONSTRAINTS;
+
+DROP TABLE CropYieldProduces CASCADE CONSTRAINTS;
+DROP TABLE Fruit CASCADE CONSTRAINTS;
+DROP TABLE Vegetable CASCADE CONSTRAINTS;
+DROP TABLE Grain CASCADE CONSTRAINTS;
+DROP TABLE GrowsCrop CASCADE CONSTRAINTS;
+
+DROP TABLE CropType CASCADE CONSTRAINTS;
+DROP TABLE SeasonByPlantDate CASCADE CONSTRAINTS;
+
+DROP TABLE ContainsField CASCADE CONSTRAINTS;
+DROP TABLE OwnsFarm CASCADE CONSTRAINTS;
+
+DROP TABLE Farmer CASCADE CONSTRAINTS;
+DROP TABLE ContactInfoName CASCADE CONSTRAINTS;
+
+-- farmer table
+--   1) ContactInfoName(ContactInfo, Name)
+--   2) Farmer(FarmerID, ContactInfo)
+
+
+-- contact info name table
+CREATE TABLE ContactInfoName (
+  ContactInfo  VARCHAR(80) PRIMARY KEY,
+  Name         VARCHAR(20)  NOT NULL
+);
+
+
+-- farmer table
+CREATE TABLE Farmer (
+  FarmerID     INT PRIMARY KEY,
+  ContactInfo  VARCHAR(80) NOT NULL,
+  CONSTRAINT fk_farmer_contact
+    FOREIGN KEY (ContactInfo) REFERENCES ContactInfoName(ContactInfo),
+  CONSTRAINT uq_farmer_contact UNIQUE (ContactInfo)
+);
+
+
+-- owns farm table
+CREATE TABLE OwnsFarm (
+  FarmID    INT PRIMARY KEY,
+  Name      VARCHAR(20) NOT NULL,
+  Location  VARCHAR(20) NOT NULL,
+  FarmerID  INT NOT NULL,
+  CONSTRAINT fk_farm_farmer
+    FOREIGN KEY (FarmerID) REFERENCES Farmer(FarmerID)
+);
+
+
+-- contains field table
+CREATE TABLE ContainsField (
+  FieldID  INT PRIMARY KEY,
+  FarmID   INT NOT NULL,
+  Area     INT,
+  CONSTRAINT fk_field_farm
+    FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+);
+
+
+-- grows crop table
+--   1) SeasonByPlantDate(PlantingDate → Season)
+--   2) CropType(Name → PlantingDate, HarvestDate, Season)
+--   3) GrowsCrop(CropID, FieldID, Name)
+
+
+-- season by plant date table
+CREATE TABLE SeasonByPlantDate (
+  PlantingDate DATE PRIMARY KEY,
+  Season       VARCHAR(20) NOT NULL
+);
+
+
+-- crop type table
+CREATE TABLE CropType (
+  Name          VARCHAR(60) PRIMARY KEY,
+  PlantingDate  DATE NOT NULL,
+  HarvestDate   DATE NOT NULL,
+  CONSTRAINT fk_croptype_plantdate
+    FOREIGN KEY (PlantingDate) REFERENCES SeasonByPlantDate(PlantingDate)
+);
+
+
+-- grows crop table
+CREATE TABLE GrowsCrop (
+  CropID   INT PRIMARY KEY,
+  FieldID  INT NOT NULL,
+  Name     VARCHAR(60) NOT NULL,
+  CONSTRAINT fk_crop_field
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+  CONSTRAINT fk_crop_name
+    FOREIGN KEY (Name) REFERENCES CropType(Name)
+);
+
+
+-- grain table (ISA subtype of crop)
+CREATE TABLE Grain (
+  CropID         INT PRIMARY KEY,
+  GlutenContent  DECIMAL(10,2),
+  CONSTRAINT fk_grain_crop
+    FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
+      ON DELETE CASCADE
+);
+
+
+-- vegetable table (ISA subtype of crop)
+CREATE TABLE Vegetable (
+  CropID   INT PRIMARY KEY,
+  IsLeafy  NUMBER(1) NOT NULL,
+  CONSTRAINT ck_veg_bool CHECK (IsLeafy IN (0,1)),
+  CONSTRAINT fk_veg_crop
+    FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
+      ON DELETE CASCADE
+);
+
+
+-- fruit table (ISA subtype of crop)
+CREATE TABLE Fruit (
+  CropID       INT PRIMARY KEY,
+  SugarContent DECIMAL(10,2),
+  CONSTRAINT fk_fruit_crop
+    FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
+      ON DELETE CASCADE
+);
+
+
+-- crop yield produces table (weak entity)
+CREATE TABLE CropYieldProduces (
+  CropID        INT PRIMARY KEY,
+  Total_Yield   DECIMAL(10,2) NOT NULL,
+  Health_Rating INT NOT NULL,
+  CONSTRAINT fk_yield_crop
+    FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
+      ON DELETE CASCADE
+);
+
+
+-- pesticide table
+CREATE TABLE Pesticide (
+  PestID  INT PRIMARY KEY,
+  Name    VARCHAR(60)
+);
+
+
+-- treats table
+CREATE TABLE Treats (
+  CropID  INT,
+  PestID  INT,
+  PRIMARY KEY (CropID, PestID),
+  CONSTRAINT fk_treats_crop
+    FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
+      ON DELETE CASCADE,
+  CONSTRAINT fk_treats_pest
+    FOREIGN KEY (PestID) REFERENCES Pesticide(PestID)
+      ON DELETE CASCADE
+);
+
+
+-- irrigation records table
+CREATE TABLE IrrigationRecords (
+  IrrigID    INT PRIMARY KEY,
+  FieldID    INT NOT NULL,
+  EventDate  DATE,
+  Volume     DECIMAL(10,2),
+  CONSTRAINT fk_irrig_field
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+);
+
+
+-- soil records table
+--   1) MoistureByChemistry(SampleDate, pH → Moisture)
+--   2) SoilRecords(SoilCondID, FieldID, SampleDate, pH)
+
+
+-- moisture by chemistry table
+CREATE TABLE MoistureByChemistry (
+  SampleDate DATE,
+  pH         DECIMAL(4,2),
+  Moisture   DECIMAL(6,2) NOT NULL,
+  PRIMARY KEY (SampleDate, pH)
+);
+
+
+-- soil records table
+CREATE TABLE SoilRecords (
+  SoilCondID  INT PRIMARY KEY,
+  FieldID     INT NOT NULL,
+  SampleDate  DATE NOT NULL,
+  pH          DECIMAL(4,2) NOT NULL,
+  CONSTRAINT fk_soil_field
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+  CONSTRAINT fk_soil_rule
+    FOREIGN KEY (SampleDate, pH) REFERENCES MoistureByChemistry(SampleDate, pH)
+);
+
+
+-- certification table
+--   1) AwardExpiry(AwardedDate → ExpiryDate)
+--   2) Certification(CertID, Name, AwardedDate)
+
+
+-- award expiry table
+CREATE TABLE AwardExpiry (
+  AwardedDate DATE PRIMARY KEY,
+  ExpiryDate  DATE NOT NULL
+);
+
+
+-- certification table
+CREATE TABLE Certification (
+  CertID      INT PRIMARY KEY,
+  Name        VARCHAR(80) NOT NULL,
+  AwardedDate DATE NOT NULL,
+  CONSTRAINT fk_cert_award
+    FOREIGN KEY (AwardedDate) REFERENCES AwardExpiry(AwardedDate)
+);
+
+
+-- receives table
+CREATE TABLE Receives (
+  FarmID  INT,
+  CertID  INT,
+  PRIMARY KEY (FarmID, CertID),
+  CONSTRAINT fk_recv_farm
+    FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID),
+  CONSTRAINT fk_recv_cert
+    FOREIGN KEY (CertID) REFERENCES Certification(CertID)
+);
+
 -- Inserts - RAW (NOT EDITED)
 
 -- ContactInfoName
@@ -35,6 +274,7 @@ INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-04-15', 
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-05-20', 'Summer');
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-07-01', 'Summer');
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-09-10', 'Fall');
+INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-10-10', 'Fall');
 
 -- CropType
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Wheat',   DATE '2025-03-10', DATE '2025-07-20');
@@ -42,25 +282,35 @@ INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Corn',    DATE '
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Tomato',  DATE '2025-05-20', DATE '2025-08-25');
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Lettuce', DATE '2025-07-01', DATE '2025-08-01');
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Apple',   DATE '2025-09-10', DATE '2026-03-01');
+INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Banana',   DATE '2025-10-10', DATE '2026-06-01');
 
 -- GrowsCrop
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (201, 1001, 'Wheat');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (206, 1001, 'Corn');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (207, 1001, 'Tomato');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (208, 1001, 'Banana');
+
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (202, 1002, 'Corn');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (203, 1003, 'Tomato');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (204, 1004, 'Lettuce');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (205, 1005, 'Apple');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (209, 1005, 'Banana');
 
 -- IsA tables
 -- Grain crops
 INSERT INTO Grain (CropID, GlutenContent) VALUES (201, 12.5); 
-INSERT INTO Grain (CropID, GlutenContent) VALUES (202, 0.00); 
+INSERT INTO Grain (CropID, GlutenContent) VALUES (202, 0.00);
+INSERT INTO Grain (CropID, GlutenContent) VALUES (206, 0.00);
 
 -- Vegetable crops
 INSERT INTO Vegetable (CropID, IsLeafy) VALUES (203, 0);  
-INSERT INTO Vegetable (CropID, IsLeafy) VALUES (204, 1); 
+INSERT INTO Vegetable (CropID, IsLeafy) VALUES (204, 1);
+INSERT INTO Vegetable (CropID, IsLeafy) VALUES (207, 0);
 
 -- Fruit crops
 INSERT INTO Fruit (CropID, SugarContent) VALUES (205, 14.2);
+INSERT INTO Fruit (CropID, SugarContent) VALUES (208, 12.3);
+INSERT INTO Fruit (CropID, SugarContent) VALUES (209, 16.8);
 
 -- CropYieldProduces
 INSERT INTO CropYieldProduces (CropID, Total_Yield, Health_Rating) VALUES (201, 5000.00, 9);

@@ -49,7 +49,6 @@ function isValidPercentage(value) {
     return !isNaN(num) && num >= 0 && num <= 100;
 }
 
-// Export
 module.exports = {
     isPositiveInteger,
     isNonNegativeNumber,

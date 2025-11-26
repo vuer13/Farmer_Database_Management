@@ -293,8 +293,8 @@ router.post("/add-irrigation", async (req, res) => {
 });
 
 router.post("/add-soilrecord", async (req, res) => {
-    const { soilCondID, fieldID, sampleDate, pH } = req.body;
-    const result = await appService.insertSoilRecord(soilCondID, fieldID, sampleDate, pH);
+    const { soilCondID, fieldID, sampleDate, pH, moisture } = req.body;
+    const result = await appService.insertSoilRecord(soilCondID, fieldID, sampleDate, pH, moisture);
     if (result) {
         res.json({ success: true });
     } else {

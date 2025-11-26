@@ -798,7 +798,8 @@ async function fetchAllTables() {
         fetchFruits(),
         fetchYields(),
         fetchIrrigation(),
-        fetchSoil()
+        fetchSoil(),
+        fetchMoisture()
     ]);
 }
 
@@ -913,6 +914,12 @@ async function fetchSoil() {
     displayTableData('soilTable', data.data);
 }
 
+async function fetchMoisture() {
+    const response = await fetch('/moisture');
+    const data = await response.json();
+    displayTableData('moistureTable', data.data);
+}
+
 // Form handlers for smaller tables
 
 async function addGrain(event) {
@@ -969,7 +976,8 @@ async function addSoil(event) {
         soilCondID: document.getElementById('soilCondID').value,
         fieldID: document.getElementById('soilFieldID').value,
         sampleDate: document.getElementById('soilDate').value,
-        pH: document.getElementById('soilPH').value
+        pH: document.getElementById('soilPH').value,
+        moisture: document.getElementById('soilMoisture').value
     }, 'soilMsg', fetchSoil);
     document.getElementById('addSoilForm').reset();
 }
@@ -1076,6 +1084,7 @@ window.onload = function () {
         ["viewYields", fetchYields],
         ["viewIrrigation", fetchIrrigation],
         ["viewSoil", fetchSoil],
+        ["viewMoisture", fetchMoisture],
         ["highestMoistureBtn", fetchHighestMoistureField],
         ["averageVolume", fetchAverageVolumes],
         ["healthyFields", fetchHealthyField],

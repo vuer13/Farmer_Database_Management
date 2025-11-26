@@ -34,6 +34,8 @@ async function initializeFarmTables() {
     if (responseData.success) {
         messageElement.textContent = 'Farm tables initialized successfully! Now you can add entities.';
         messageElement.style.color = 'green';
+
+        fetchAllTables();
     } else {
         messageElement.textContent = 'Error initializing farm tables!';
         messageElement.style.color = 'red';
@@ -486,6 +488,7 @@ async function fetchJoinedFC(event) {
             // Clears table when no results
             displayTableData('joinFarmTable', []);
         }
+        document.getElementById('joinFCForm').reset();
     } catch (err) {
         console.error('Error fetching crops by farm', err);
         messageElement.textContent = "Error fetching data.";

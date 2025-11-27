@@ -163,6 +163,7 @@ router.get('/healthy-field', async (req, res) => {
 router.get("/projection", async(req, res) => {
     const filter = { display: req.query.display };
     const result = await appService.getFields(filter);
+    res.json(result);
 })
 
 router.get('/all-pesticides', async (req, res) => {

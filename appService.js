@@ -849,14 +849,26 @@ async function insertIrrigationRecord(irrigID, fieldID, eventDate, volume) {
     }).catch(() => { return false; });
 }
 
-async function insertSoilRecord(soilCondID, fieldID, sampleDate, pH) {
+async function insertSoilRecord(soilCondID, fieldID, sampleDate, pH, moisture) {
     if (!validate.isPositiveInteger(soilCondID) || 
         !validate.isPositiveInteger(fieldID) || 
         !validate.isValidDate(sampleDate) || 
-        !validate.isValidpH(pH)) {
+        !validate.isValidpH(pH) ||
+        !validate.isNonNegativeNumber(moisture)) {
         return false;
     }
     return await withOracleDB(async (connection) => {
+        // Insert MoistureByChemistry if not exists
+        try {
+            await connection.execute(
+                `INSERT INTO MoistureByChemistry VALUES (TO_DATE(:sampleDate, 'YYYY-MM-DD'), :pH, :moisture)`,
+                [sampleDate, pH, moisture],
+                { autoCommit: true }
+            );
+        } catch (err) {
+            // Entry already exists
+        }
+        
         const result = await connection.execute(
             `INSERT INTO SoilRecords VALUES (:soilCondID, :fieldID, TO_DATE(:sampleDate, 'YYYY-MM-DD'), :pH)`,
             [soilCondID, fieldID, sampleDate, pH],

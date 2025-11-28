@@ -564,11 +564,17 @@ async function fetchContactInfo() {
 // Insert functions
 
 async function insertFarmer(farmerID, name, contactInfo) {
-    if (!validate.isPositiveInteger(farmerID) || 
-        !validate.isValidString(name, 20) || 
-        !validate.isValidEmail(contactInfo)) {
-        return false;
+    // Validation with error handling
+    if (!validate.isPositiveInteger(farmerID)) {
+        return { success: false, message: "Farmer ID must be a positive integer." };
     }
+    if (!validate.isValidString(name, 20)) {
+        return { success: false, message: "Name must be between 1-20 characters." };
+    }
+    if (!validate.isValidEmail(contactInfo)) {
+        return { success: false, message: "Please enter a valid email address." };
+    }
+
     return await withOracleDB(async (connection) => {
         try {
             // Insert ContactInfoName
@@ -584,51 +590,118 @@ async function insertFarmer(farmerID, name, contactInfo) {
                 { autoCommit: false }
             );
             await connection.commit();
-            return true;
+            return { success: true, message: "Farmer added successfully!" };
         } catch (err) {
             console.error('Error inserting farmer:', err);
             await connection.rollback();
-            return false;
+            
+            // Handle specific Oracle errors
+            if (err.errorNum === 1) {
+                return { success: false, message: "Farmer ID or email already exists. Please use different values." };
+            } else if (err.errorNum === 1400) {
+                return { success: false, message: "Missing required field. All fields are required." };
+            } else if (err.errorNum === 12899) {
+                return { success: false, message: "Input too long. Name max 20 chars, email max 80 chars." };
+            }
+            
+            return { success: false, message: "Database error: " + err.message };
         }
-    }).catch(() => {
-        return false;
+    }).catch((err) => {
+        console.error("Connection error:", err);
+        return { success: false, message: "Unable to connect to database." };
     });
 }
 
 async function insertFarm(farmID, name, location, farmerID) {
-    if (!validate.isPositiveInteger(farmID) || 
-        !validate.isValidString(name, 20) || 
-        !validate.isValidString(location, 20) || 
-        !validate.isPositiveInteger(farmerID)) {
-        return false;
+    // Validation with error handling
+    if (!validate.isPositiveInteger(farmID)) {
+        return { success: false, message: "Farm ID must be a positive integer." };
     }
+    if (!validate.isValidString(name, 20)) {
+        return { success: false, message: "Farm name must be between 1-20 characters." };
+    }
+    if (!validate.isValidString(location, 20)) {
+        return { success: false, message: "Location must be between 1-20 characters." };
+    }
+    if (!validate.isPositiveInteger(farmerID)) {
+        return { success: false, message: "Farmer ID must be a positive integer." };
+    }
+
     return await withOracleDB(async (connection) => {
-        const result = await connection.execute(
-            `INSERT INTO OwnsFarm VALUES (:farmID, :name, :location, :farmerID)`,
-            [farmID, name, location, farmerID],
-            { autoCommit: true }
-        );
-        return result.rowsAffected && result.rowsAffected > 0;
-    }).catch(() => {
-        return false;
+        try {
+            const result = await connection.execute(
+                `INSERT INTO OwnsFarm VALUES (:farmID, :name, :location, :farmerID)`,
+                [farmID, name, location, farmerID],
+                { autoCommit: true }
+            );
+            if (result.rowsAffected && result.rowsAffected > 0) {
+                return { success: true, message: "Farm added successfully!" };
+            }
+            return { success: false, message: "Failed to add farm." };
+        } catch (err) {
+            console.error("Insert farm error:", err);
+            
+            // Handle specific Oracle errors
+            if (err.errorNum === 1) {
+                return { success: false, message: "Farm ID already exists. Please use a different ID." };
+            } else if (err.errorNum === 2291) {
+                return { success: false, message: "Farmer ID not found. Please enter a valid Farmer ID." };
+            } else if (err.errorNum === 1400) {
+                return { success: false, message: "Missing required field. All fields are required." };
+            } else if (err.errorNum === 12899) {
+                return { success: false, message: "Input too long. Please shorten your entries." };
+            }
+            
+            return { success: false, message: "Database error: " + err.message };
+        }
+    }).catch((err) => {
+        console.error("Connection error:", err);
+        return { success: false, message: "Unable to connect to database." };
     });
 }
 
 async function insertField(fieldID, farmID, area) {
-    if (!validate.isPositiveInteger(fieldID) || 
-        !validate.isPositiveInteger(farmID) || 
-        (area !== null && area !== undefined && !validate.isNonNegativeNumber(area))) {
-        return false;
+    // Validation with error handling
+    if (!validate.isPositiveInteger(fieldID)) {
+        return { success: false, message: "Field ID must be a positive integer." };
     }
+    if (!validate.isPositiveInteger(farmID)) {
+        return { success: false, message: "Farm ID must be a positive integer." };
+    }
+    if (area !== null && area !== undefined && !validate.isNonNegativeNumber(area)) {
+        return { success: false, message: "Area must be a non-negative number." };
+    }
+
     return await withOracleDB(async (connection) => {
-        const result = await connection.execute(
-            `INSERT INTO ContainsField VALUES (:fieldID, :farmID, :area)`,
-            [fieldID, farmID, area],
-            { autoCommit: true }
-        );
-        return result.rowsAffected && result.rowsAffected > 0;
-    }).catch(() => {
-        return false;
+        try {
+            const result = await connection.execute(
+                `INSERT INTO ContainsField VALUES (:fieldID, :farmID, :area)`,
+                [fieldID, farmID, area],
+                { autoCommit: true }
+            );
+            if (result.rowsAffected && result.rowsAffected > 0) {
+                return { success: true, message: "Field added successfully!" };
+            }
+            return { success: false, message: "Failed to add field." };
+        } catch (err) {
+            console.error("Insert field error:", err);
+            
+            // Handle specific Oracle errors
+            if (err.errorNum === 1) {
+                return { success: false, message: "Field ID already exists. Please use a different ID." };
+            } else if (err.errorNum === 2291) {
+                return { success: false, message: "Farm ID not found. Please enter a valid Farm ID." };
+            } else if (err.errorNum === 1400) {
+                return { success: false, message: "Missing required field. Field ID and Farm ID are required." };
+            } else if (err.errorNum === 1722) {
+                return { success: false, message: "Invalid number format. Please enter valid numbers." };
+            }
+            
+            return { success: false, message: "Database error: " + err.message };
+        }
+    }).catch((err) => {
+        console.error("Connection error:", err);
+        return { success: false, message: "Unable to connect to database." };
     });
 }
 

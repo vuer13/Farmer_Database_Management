@@ -295,21 +295,36 @@ INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (204, 1004, 'Lettuce');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (205, 1005, 'Apple');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (209, 1005, 'Banana');
 
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (210, 1003, 'Cucumber');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (211, 1003, 'Basil');
+
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (212, 1003, 'Orange');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (213, 1003, 'Kiwi');
+
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (214, 1003, 'Rice');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (215, 1003, 'Oats');
+
 -- IsA tables
 -- Grain crops
 INSERT INTO Grain (CropID, GlutenContent) VALUES (201, 12.5); 
 INSERT INTO Grain (CropID, GlutenContent) VALUES (202, 0.00);
 INSERT INTO Grain (CropID, GlutenContent) VALUES (206, 0.00);
+INSERT INTO Grain (CropID, GlutenContent) VALUES (214, 0.00);
+INSERT INTO Grain (CropID, GlutenContent) VALUES (215, 1.00);
 
 -- Vegetable crops
 INSERT INTO Vegetable (CropID, IsLeafy) VALUES (203, 0);  
 INSERT INTO Vegetable (CropID, IsLeafy) VALUES (204, 1);
 INSERT INTO Vegetable (CropID, IsLeafy) VALUES (207, 0);
+INSERT INTO Vegetable (CropID, IsLeafy) VALUES (210, 0);
+INSERT INTO Vegetable (CropID, IsLeafy) VALUES (211, 1);
 
 -- Fruit crops
 INSERT INTO Fruit (CropID, SugarContent) VALUES (205, 14.2);
 INSERT INTO Fruit (CropID, SugarContent) VALUES (208, 12.3);
 INSERT INTO Fruit (CropID, SugarContent) VALUES (209, 16.8);
+INSERT INTO Fruit (CropID, SugarContent) VALUES (212, 15.6);
+INSERT INTO Fruit (CropID, SugarContent) VALUES (213, 12.8);
 
 -- CropYieldProduces
 INSERT INTO CropYieldProduces (CropID, Total_Yield, Health_Rating) VALUES (201, 5000.00, 9);

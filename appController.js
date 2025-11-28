@@ -176,30 +176,30 @@ router.get('/all-pesticides', async (req, res) => {
 router.post("/add-farmer", async (req, res) => {
     const { farmerID, name, contactInfo } = req.body;
     const result = await appService.insertFarmer(farmerID, name, contactInfo);
-    if (result) {
-        res.json({ success: true, message: "Farmer added successfully" });
+    if (result.success) {
+        res.json(result);
     } else {
-        res.status(500).json({ success: false, message: "Error adding farmer" });
+        res.status(400).json(result);
     }
 });
 
 router.post("/add-farm", async (req, res) => {
     const { farmID, name, location, farmerID } = req.body;
     const result = await appService.insertFarm(farmID, name, location, farmerID);
-    if (result) {
-        res.json({ success: true, message: "Farm added successfully" });
+    if (result.success) {
+        res.json(result);
     } else {
-        res.status(500).json({ success: false, message: "Error adding farm" });
+        res.status(400).json(result);
     }
 });
 
 router.post("/add-field", async (req, res) => {
     const { fieldID, farmID, area } = req.body;
     const result = await appService.insertField(fieldID, farmID, area);
-    if (result) {
-        res.json({ success: true, message: "Field added successfully" });
+    if (result.success) {
+        res.json(result);
     } else {
-        res.status(500).json({ success: false, message: "Error adding field" });
+        res.status(400).json(result);
     }
 });
 

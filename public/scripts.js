@@ -86,14 +86,12 @@ async function addFarmer(event) {
     const responseData = await response.json();
     const messageElement = document.getElementById('farmerMsg');
 
+    messageElement.textContent = responseData.message;
+    messageElement.style.color = responseData.success ? 'green' : 'red';
+
     if (responseData.success) {
-        messageElement.textContent = 'Farmer added successfully!';
-        messageElement.style.color = 'green';
         document.getElementById('addFarmerForm').reset();
         fetchFarmers();
-    } else {
-        messageElement.textContent = 'Error adding farmer!';
-        messageElement.style.color = 'red';
     }
 }
 
@@ -120,14 +118,12 @@ async function addFarm(event) {
     const responseData = await response.json();
     const messageElement = document.getElementById('farmMsg');
 
+    messageElement.textContent = responseData.message;
+    messageElement.style.color = responseData.success ? 'green' : 'red';
+
     if (responseData.success) {
-        messageElement.textContent = 'Farm added successfully!';
-        messageElement.style.color = 'green';
         document.getElementById('addFarmForm').reset();
         fetchFarms();
-    } else {
-        messageElement.textContent = 'Error adding farm!';
-        messageElement.style.color = 'red';
     }
 }
 
@@ -152,14 +148,12 @@ async function addField(event) {
     const responseData = await response.json();
     const messageElement = document.getElementById('fieldMsg');
 
+    messageElement.textContent = responseData.message;
+    messageElement.style.color = responseData.success ? 'green' : 'red';
+
     if (responseData.success) {
-        messageElement.textContent = 'Field added successfully!';
-        messageElement.style.color = 'green';
         document.getElementById('addFieldForm').reset();
         fetchFields();
-    } else {
-        messageElement.textContent = 'Error adding field!';
-        messageElement.style.color = 'red';
     }
 }
 

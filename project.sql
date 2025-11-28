@@ -1,27 +1,20 @@
 DROP TABLE Receives CASCADE CONSTRAINTS;
 DROP TABLE Certification CASCADE CONSTRAINTS;
 DROP TABLE AwardExpiry CASCADE CONSTRAINTS;
-
 DROP TABLE SoilRecords CASCADE CONSTRAINTS;
 DROP TABLE MoistureByChemistry CASCADE CONSTRAINTS;
-
 DROP TABLE IrrigationRecords CASCADE CONSTRAINTS;
-
 DROP TABLE Treats CASCADE CONSTRAINTS;
 DROP TABLE Pesticide CASCADE CONSTRAINTS;
-
 DROP TABLE CropYieldProduces CASCADE CONSTRAINTS;
 DROP TABLE Fruit CASCADE CONSTRAINTS;
 DROP TABLE Vegetable CASCADE CONSTRAINTS;
 DROP TABLE Grain CASCADE CONSTRAINTS;
 DROP TABLE GrowsCrop CASCADE CONSTRAINTS;
-
 DROP TABLE CropType CASCADE CONSTRAINTS;
 DROP TABLE SeasonByPlantDate CASCADE CONSTRAINTS;
-
 DROP TABLE ContainsField CASCADE CONSTRAINTS;
 DROP TABLE OwnsFarm CASCADE CONSTRAINTS;
-
 DROP TABLE Farmer CASCADE CONSTRAINTS;
 DROP TABLE ContactInfoName CASCADE CONSTRAINTS;
 
@@ -65,6 +58,7 @@ CREATE TABLE ContainsField (
   Area     INT,
   CONSTRAINT fk_field_farm
     FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+    ON DELETE CASCADE
 );
 
 
@@ -97,7 +91,8 @@ CREATE TABLE GrowsCrop (
   FieldID  INT NOT NULL,
   Name     VARCHAR(60) NOT NULL,
   CONSTRAINT fk_crop_field
-    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+    ON DELETE CASCADE,
   CONSTRAINT fk_crop_name
     FOREIGN KEY (Name) REFERENCES CropType(Name)
 );
@@ -136,9 +131,10 @@ CREATE TABLE Fruit (
 
 -- crop yield produces table (weak entity)
 CREATE TABLE CropYieldProduces (
-  CropID        INT PRIMARY KEY,
+  CropID        INT,
   Total_Yield   DECIMAL(10,2) NOT NULL,
   Health_Rating INT NOT NULL,
+  PRIMARY KEY (CropID, Total_Yield),
   CONSTRAINT fk_yield_crop
     FOREIGN KEY (CropID) REFERENCES GrowsCrop(CropID)
       ON DELETE CASCADE
@@ -174,6 +170,7 @@ CREATE TABLE IrrigationRecords (
   Volume     DECIMAL(10,2),
   CONSTRAINT fk_irrig_field
     FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+    ON DELETE CASCADE
 );
 
 
@@ -198,7 +195,8 @@ CREATE TABLE SoilRecords (
   SampleDate  DATE NOT NULL,
   pH          DECIMAL(4,2) NOT NULL,
   CONSTRAINT fk_soil_field
-    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+    ON DELETE CASCADE,
   CONSTRAINT fk_soil_rule
     FOREIGN KEY (SampleDate, pH) REFERENCES MoistureByChemistry(SampleDate, pH)
 );
@@ -232,7 +230,8 @@ CREATE TABLE Receives (
   CertID  INT,
   PRIMARY KEY (FarmID, CertID),
   CONSTRAINT fk_recv_farm
-    FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID),
+    FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+    ON DELETE CASCADE,
   CONSTRAINT fk_recv_cert
     FOREIGN KEY (CertID) REFERENCES Certification(CertID)
 );

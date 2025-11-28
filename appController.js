@@ -345,7 +345,7 @@ router.post("/delete-farms", async (req, res) => {
     }
 })
 
-// Selection
+// Selection Query
 router.post("/selection", async (req, res) => {
     const result = await appService.selectFields(req.body);
     if (result.success) {

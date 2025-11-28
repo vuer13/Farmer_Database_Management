@@ -355,8 +355,11 @@ async function populateTables() {
                 await connection.execute(statement);
                 await connection.commit();
             } catch (err) {
-                console.error(`Error executing SQL statement:\n ${statement}\n`, err);
-                return false;
+                // dropping a table that does not exist (errno 942) should not cause failure, anything else should
+                if (err.errorNum !== 942) {
+                    console.error(`Error executing SQL statement:\n ${statement}\n`, err);
+                    return false;
+                }
             }
         }
 

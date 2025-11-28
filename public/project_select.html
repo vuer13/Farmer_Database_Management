@@ -31,7 +31,7 @@
         <label><input type="checkbox" name="projectionField" value="FieldID"> Field ID</label><br>
         <label><input type="checkbox" name="projectionField" value="Area"> Area</label><br>
 
-        <button type="submit">Run Projection</button>
+        <button type="submit">See Your Columns</button>
 
         <p id="projectionMsg"></p>
     </form>
@@ -42,14 +42,14 @@
     
     <br><hr><br> <!-- ========================================================================= -->
 
-    <h2>Selection on ContainsFields</h2>
+    <h2>Filter ContainsFields</h2>
     <p>Please note: SQL will perform all AND operations before OR operations</p>
     <form id="selectionForm" onsubmit="fetchSelection(event)">
 
         <div id="conditionsContainer"></div>
 
         <button type="button" onclick="addCondition()">Add Condition</button>
-        <button type="submit">Run Selection</button>
+        <button type="submit">Run Filter</button>
 
         <p id="selectionMsg"></p>
 

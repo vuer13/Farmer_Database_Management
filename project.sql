@@ -1,29 +1,27 @@
--- Dropping tables
-DROP TABLE ContactInfoName CASCADE CONSTRAINT;
-DROP TABLE Farmer CASCADE CONSTRAINT;
-DROP TABLE OwnsFarm CASCADE CONSTRAINT;
-DROP TABLE ContainsField CASCADE CONSTRAINT;
-DROP TABLE SeasonByPlantDate CASCADE CONSTRAINT;
-DROP TABLE CropType CASCADE CONSTRAINT;
-DROP TABLE GrowsCrop CASCADE CONSTRAINT;
-DROP TABLE Grain CASCADE CONSTRAINT;
-DROP TABLE Vegetable CASCADE CONSTRAINT;
-DROP TABLE Fruit CASCADE CONSTRAINT;
-DROP TABLE CropYieldProduces CASCADE CONSTRAINT;
-DROP TABLE Pesticide CASCADE CONSTRAINT;
-DROP TABLE Treats CASCADE CONSTRAINT;
-DROP TABLE IrrigationRecords CASCADE CONSTRAINT;
-DROP TABLE MoistureByChemistry CASCADE CONSTRAINT;
-DROP TABLE SoilRecords CASCADE CONSTRAINT;
-DROP TABLE AwardExpiry CASCADE CONSTRAINT;
-DROP TABLE Certification CASCADE CONSTRAINT;
-DROP TABLE Receives CASCADE CONSTRAINT;
-
--- Creating Tables - RAW (NOT EDITED)
+DROP TABLE Receives CASCADE CONSTRAINTS;
+DROP TABLE Certification CASCADE CONSTRAINTS;
+DROP TABLE AwardExpiry CASCADE CONSTRAINTS;
+DROP TABLE SoilRecords CASCADE CONSTRAINTS;
+DROP TABLE MoistureByChemistry CASCADE CONSTRAINTS;
+DROP TABLE IrrigationRecords CASCADE CONSTRAINTS;
+DROP TABLE Treats CASCADE CONSTRAINTS;
+DROP TABLE Pesticide CASCADE CONSTRAINTS;
+DROP TABLE CropYieldProduces CASCADE CONSTRAINTS;
+DROP TABLE Fruit CASCADE CONSTRAINTS;
+DROP TABLE Vegetable CASCADE CONSTRAINTS;
+DROP TABLE Grain CASCADE CONSTRAINTS;
+DROP TABLE GrowsCrop CASCADE CONSTRAINTS;
+DROP TABLE CropType CASCADE CONSTRAINTS;
+DROP TABLE SeasonByPlantDate CASCADE CONSTRAINTS;
+DROP TABLE ContainsField CASCADE CONSTRAINTS;
+DROP TABLE OwnsFarm CASCADE CONSTRAINTS;
+DROP TABLE Farmer CASCADE CONSTRAINTS;
+DROP TABLE ContactInfoName CASCADE CONSTRAINTS;
 
 -- farmer table
 --   1) ContactInfoName(ContactInfo, Name)
 --   2) Farmer(FarmerID, ContactInfo)
+
 
 -- contact info name table
 CREATE TABLE ContactInfoName (
@@ -31,7 +29,6 @@ CREATE TABLE ContactInfoName (
   Name         VARCHAR(20)  NOT NULL
 );
 
-grant select on ContactInfoName to public;
 
 -- farmer table
 CREATE TABLE Farmer (
@@ -42,7 +39,6 @@ CREATE TABLE Farmer (
   CONSTRAINT uq_farmer_contact UNIQUE (ContactInfo)
 );
 
-grant select on Farmer to public;
 
 -- owns farm table
 CREATE TABLE OwnsFarm (
@@ -54,7 +50,6 @@ CREATE TABLE OwnsFarm (
     FOREIGN KEY (FarmerID) REFERENCES Farmer(FarmerID)
 );
 
-grant select on OwnsFarm to public;
 
 -- contains field table
 CREATE TABLE ContainsField (
@@ -63,9 +58,9 @@ CREATE TABLE ContainsField (
   Area     INT,
   CONSTRAINT fk_field_farm
     FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+    ON DELETE CASCADE
 );
 
-grant select on ContainsField to public;
 
 -- grows crop table
 --   1) SeasonByPlantDate(PlantingDate → Season)
@@ -79,7 +74,6 @@ CREATE TABLE SeasonByPlantDate (
   Season       VARCHAR(20) NOT NULL
 );
 
-grant select on SeasonByPlantDate to public;
 
 -- crop type table
 CREATE TABLE CropType (
@@ -90,7 +84,6 @@ CREATE TABLE CropType (
     FOREIGN KEY (PlantingDate) REFERENCES SeasonByPlantDate(PlantingDate)
 );
 
-grant select on CropType to public;
 
 -- grows crop table
 CREATE TABLE GrowsCrop (
@@ -98,12 +91,12 @@ CREATE TABLE GrowsCrop (
   FieldID  INT NOT NULL,
   Name     VARCHAR(60) NOT NULL,
   CONSTRAINT fk_crop_field
-    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+    ON DELETE CASCADE,
   CONSTRAINT fk_crop_name
     FOREIGN KEY (Name) REFERENCES CropType(Name)
 );
 
-grant select on GrowsCrop to public;
 
 -- grain table (ISA subtype of crop)
 CREATE TABLE Grain (
@@ -114,7 +107,6 @@ CREATE TABLE Grain (
       ON DELETE CASCADE
 );
 
-grant select on Grain to public;
 
 -- vegetable table (ISA subtype of crop)
 CREATE TABLE Vegetable (
@@ -126,7 +118,6 @@ CREATE TABLE Vegetable (
       ON DELETE CASCADE
 );
 
-grant select on Vegetable to public;
 
 -- fruit table (ISA subtype of crop)
 CREATE TABLE Fruit (
@@ -137,12 +128,11 @@ CREATE TABLE Fruit (
       ON DELETE CASCADE
 );
 
-grant select on Fruit to public;
 
 -- crop yield produces table (weak entity)
 CREATE TABLE CropYieldProduces (
   CropID        INT,
-  Total_Yield   DECIMAL(10,2),
+  Total_Yield   DECIMAL(10,2) NOT NULL,
   Health_Rating INT NOT NULL,
   PRIMARY KEY (CropID, Total_Yield),
   CONSTRAINT fk_yield_crop
@@ -150,7 +140,6 @@ CREATE TABLE CropYieldProduces (
       ON DELETE CASCADE
 );
 
-grant select on CropYieldProduces to public;
 
 -- pesticide table
 CREATE TABLE Pesticide (
@@ -158,7 +147,6 @@ CREATE TABLE Pesticide (
   Name    VARCHAR(60)
 );
 
-grant select on Pesticide to public;
 
 -- treats table
 CREATE TABLE Treats (
@@ -173,7 +161,6 @@ CREATE TABLE Treats (
       ON DELETE CASCADE
 );
 
-grant select on Treats to public;
 
 -- irrigation records table
 CREATE TABLE IrrigationRecords (
@@ -183,9 +170,9 @@ CREATE TABLE IrrigationRecords (
   Volume     DECIMAL(10,2),
   CONSTRAINT fk_irrig_field
     FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+    ON DELETE CASCADE
 );
 
-grant select on IrrigationRecords to public;
 
 -- soil records table
 --   1) MoistureByChemistry(SampleDate, pH → Moisture)
@@ -200,7 +187,6 @@ CREATE TABLE MoistureByChemistry (
   PRIMARY KEY (SampleDate, pH)
 );
 
-grant select on MoistureByChemistry to public;
 
 -- soil records table
 CREATE TABLE SoilRecords (
@@ -209,12 +195,12 @@ CREATE TABLE SoilRecords (
   SampleDate  DATE NOT NULL,
   pH          DECIMAL(4,2) NOT NULL,
   CONSTRAINT fk_soil_field
-    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID),
+    FOREIGN KEY (FieldID) REFERENCES ContainsField(FieldID)
+    ON DELETE CASCADE,
   CONSTRAINT fk_soil_rule
     FOREIGN KEY (SampleDate, pH) REFERENCES MoistureByChemistry(SampleDate, pH)
 );
 
-grant select on SoilRecords to public;
 
 -- certification table
 --   1) AwardExpiry(AwardedDate → ExpiryDate)
@@ -227,7 +213,6 @@ CREATE TABLE AwardExpiry (
   ExpiryDate  DATE NOT NULL
 );
 
-grant select on AwardExpiry to public;
 
 -- certification table
 CREATE TABLE Certification (
@@ -238,7 +223,6 @@ CREATE TABLE Certification (
     FOREIGN KEY (AwardedDate) REFERENCES AwardExpiry(AwardedDate)
 );
 
-grant select on Certification to public;
 
 -- receives table
 CREATE TABLE Receives (
@@ -246,12 +230,11 @@ CREATE TABLE Receives (
   CertID  INT,
   PRIMARY KEY (FarmID, CertID),
   CONSTRAINT fk_recv_farm
-    FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID),
+    FOREIGN KEY (FarmID) REFERENCES OwnsFarm(FarmID)
+    ON DELETE CASCADE,
   CONSTRAINT fk_recv_cert
     FOREIGN KEY (CertID) REFERENCES Certification(CertID)
 );
-
-grant select on Receives to public;
 
 -- Inserts - RAW (NOT EDITED)
 
@@ -282,6 +265,7 @@ INSERT INTO ContainsField (FieldID, FarmID, Area) VALUES (1002, 102, 40);
 INSERT INTO ContainsField (FieldID, FarmID, Area) VALUES (1003, 103, 30);
 INSERT INTO ContainsField (FieldID, FarmID, Area) VALUES (1004, 104, 35);
 INSERT INTO ContainsField (FieldID, FarmID, Area) VALUES (1005, 105, 25);
+INSERT INTO ContainsField (FieldID, FarmID, Area) VALUES (1006, 103, 65);
 
 -- SeasonByPlantDate
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-03-10', 'Spring');
@@ -289,6 +273,7 @@ INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-04-15', 
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-05-20', 'Summer');
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-07-01', 'Summer');
 INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-09-10', 'Fall');
+INSERT INTO SeasonByPlantDate (PlantingDate, Season) VALUES (DATE '2025-10-10', 'Fall');
 
 -- CropType
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Wheat',   DATE '2025-03-10', DATE '2025-07-20');
@@ -296,25 +281,35 @@ INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Corn',    DATE '
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Tomato',  DATE '2025-05-20', DATE '2025-08-25');
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Lettuce', DATE '2025-07-01', DATE '2025-08-01');
 INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Apple',   DATE '2025-09-10', DATE '2026-03-01');
+INSERT INTO CropType (Name, PlantingDate, HarvestDate) VALUES ('Banana',   DATE '2025-10-10', DATE '2026-06-01');
 
 -- GrowsCrop
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (201, 1001, 'Wheat');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (206, 1001, 'Corn');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (207, 1001, 'Tomato');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (208, 1001, 'Banana');
+
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (202, 1002, 'Corn');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (203, 1003, 'Tomato');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (204, 1004, 'Lettuce');
 INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (205, 1005, 'Apple');
+INSERT INTO GrowsCrop (CropID, FieldID, Name) VALUES (209, 1005, 'Banana');
 
 -- IsA tables
 -- Grain crops
 INSERT INTO Grain (CropID, GlutenContent) VALUES (201, 12.5); 
-INSERT INTO Grain (CropID, GlutenContent) VALUES (202, 0.00); 
+INSERT INTO Grain (CropID, GlutenContent) VALUES (202, 0.00);
+INSERT INTO Grain (CropID, GlutenContent) VALUES (206, 0.00);
 
 -- Vegetable crops
 INSERT INTO Vegetable (CropID, IsLeafy) VALUES (203, 0);  
-INSERT INTO Vegetable (CropID, IsLeafy) VALUES (204, 1); 
+INSERT INTO Vegetable (CropID, IsLeafy) VALUES (204, 1);
+INSERT INTO Vegetable (CropID, IsLeafy) VALUES (207, 0);
 
 -- Fruit crops
 INSERT INTO Fruit (CropID, SugarContent) VALUES (205, 14.2);
+INSERT INTO Fruit (CropID, SugarContent) VALUES (208, 12.3);
+INSERT INTO Fruit (CropID, SugarContent) VALUES (209, 16.8);
 
 -- CropYieldProduces
 INSERT INTO CropYieldProduces (CropID, Total_Yield, Health_Rating) VALUES (201, 5000.00, 9);
@@ -331,12 +326,24 @@ INSERT INTO Pesticide(PestID, Name) VALUES (5, 'Get Outta Here Pests');
 INSERT INTO Pesticide(PestID, Name) VALUES (6, 'Pest Eliminator 3000');
 
 
+-- Treat Crops With Pesticide
 INSERT INTO Treats(CropID, PestID) VALUES (201, 1);
 INSERT INTO Treats(CropID, PestID) VALUES (201, 2);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 3);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 4);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 5);
+INSERT INTO Treats(CropID, PestID) VALUES (201, 6);
+
 INSERT INTO Treats(CropID, PestID) VALUES (202, 1);
 INSERT INTO Treats(CropID, PestID) VALUES (202, 3);
 INSERT INTO Treats(CropID, PestID) VALUES (203, 2);
+
+INSERT INTO Treats(CropID, PestID) VALUES (205, 1);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 2);
 INSERT INTO Treats(CropID, PestID) VALUES (205, 3);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 4);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 5);
+INSERT INTO Treats(CropID, PestID) VALUES (205, 6);
 
 
 -- IrrigationRecords
@@ -354,16 +361,45 @@ INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-05
 INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-06-25', 6.2, 20.0);
 INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-07-30', 7.5, 15.0);
 INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-08-15', 6.9, 19.5);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-09-01', 4.0, 28.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-09-15', 4.5, 24.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-10-05', 5.2, 30.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2023-10-20', 6.8, 27.5);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2024-09-15', 5.5, 24.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2024-10-05', 5.7, 30.0);
+INSERT INTO MoistureByChemistry (SampleDate, pH, Moisture) VALUES (DATE '2024-10-20', 4.2, 27.5);
 
 
 -- SoilRecords
+-- Field 1001
 INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (1, 1001, DATE '2023-03-15', 6.5);
 INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (2, 1001, DATE '2023-04-20', 7.0);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (3, 1002, DATE '2023-05-10', 5.8);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (4, 1002, DATE '2023-06-25', 6.2);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (5, 1003, DATE '2023-07-30', 7.5);
-INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (6, 1003, DATE '2023-08-15', 6.9);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (3, 1001, DATE '2023-10-05', 5.2);
 
+-- Field 1002
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (4, 1002, DATE '2023-05-10', 5.8);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (5, 1002, DATE '2023-06-25', 6.2);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (6, 1002, DATE '2023-10-20', 6.8);
+
+-- Field 1003
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (7, 1003, DATE '2023-07-30', 7.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (8, 1003, DATE '2023-08-15', 6.9);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (9, 1003, DATE '2023-09-01', 4.0);
+
+-- Field 1004
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (10, 1004, DATE '2023-09-15', 4.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (11, 1004, DATE '2023-10-05', 5.2);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (12, 1004, DATE '2023-10-20', 6.8);
+
+-- Field 1005
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (13, 1005, DATE '2023-09-01', 4.0);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (14, 1005, DATE '2023-09-15', 4.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (15, 1005, DATE '2023-10-05', 5.2);
+
+-- Field 1006
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (16, 1006, DATE '2024-09-15', 5.5);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (17, 1006, DATE '2024-10-05', 5.7);
+INSERT INTO SoilRecords (SoilCondID, FieldID, SampleDate, pH) VALUES (18, 1006, DATE '2024-10-20', 4.2);
 
 -- AwardExpiry
 INSERT INTO AwardExpiry (AwardedDate, ExpiryDate) VALUES (DATE '2021-10-16', DATE '2023-10-16');

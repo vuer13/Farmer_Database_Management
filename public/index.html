@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Management System</title>
+</head>
+<body>
+    <!-- ===================================================================================== -->
+    <!-- Database Connection Status -->
+    <h1>Database Connection Status: 
+        <span id="dbStatus"> </span>
+        <img id="loadingGif" class="loading-gif" src="loading_100px.gif" alt="Loading...">
+    </h1>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <h1>Farm Management System</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="crops_by_farm.html">Find Crops By Farm</a></li>
+            <li><a href="project_select.html">More Fields!</a></li>
+        </ul>
+    </nav>
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- ===================================================================================== -->
+    <!-- Initialize Farm Tables Section -->
+    <h2>Initialize Farm Management Tables</h2>
+    <p>Click the button below to create all farm management tables (do this first!).</p>
+    <button id="initializeFarmTables">Initialize Farm Tables</button>
+    <div id="farmInitMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <br><hr><br> <!-- ========================================================================= -->
+    <!-- Populate tables -->
+    <h2>Populate Tables with Sample Data</h2>
+    <button id="populateTables">Populate</button>
+    <div id="populateMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Farmers Section -->
+    <h2>Farmers</h2>
+    
+    <h3>Add New Farmer</h3>
+    <form id="addFarmerForm">
+        Farmer ID: <input type="number" id="farmerID" placeholder="e.g., 1" required> <br><br>
+        Name: <input type="text" id="farmerName" placeholder="e.g., John Smith" required> <br><br>
+        Contact Info: <input type="email" id="farmerContact" placeholder="e.g., john@farm.com" required> <br><br>
+        <button type="submit">Add Farmer</button>
+    </form>
+    <div id="farmerMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">View All Farmers</h3>
+    <button id="viewFarmers">Refresh Farmers</button>
+    <table id="farmersTable" border="1" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Farmer ID</th>
+                <th>Contact Info</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Farms Section (insert + update + delete)-->
+    <h2>Farms</h2>
+    
+    <h3>Add New Farm</h3>
+    <form id="addFarmForm">
+        Farm ID: <input type="number" id="farmID" placeholder="e.g., 101" required> <br><br>
+        Farm Name: <input type="text" id="farmName" placeholder="e.g., Sunny Fields" required> <br><br>
+        Location: <input type="text" id="farmLocation" placeholder="e.g., British Columbia" required> <br><br>
+        Farmer ID: <input type="number" id="farmFarmerID" placeholder="e.g., 1" required> <br><br>
+        <button type="submit">Add Farm</button>
+    </form>
+    <div id="farmMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">Update Farm</h3>
+    <form id="updateFarmForm">
+        Farm ID (required): 
+        <input type="number" id="updatefarmID" placeholder="e.g., 101" min="1" required> <br><br>
+
+        Farm Name (optional): 
+        <input type="text" id="updatefarmName" placeholder="e.g., Sunny Fields" maxlength="20"> <br><br>
+
+        Location (optional): 
+        <input type="text" id="updatefarmLocation" placeholder="e.g., British Columbia" maxlength="20"> <br><br>
+
+        Farmer ID (optional): 
+        <input type="number" id="updatefarmerID" placeholder="e.g., 1" min="1"> <br><br>
+
+        <button type="submit">Update Farm</button>
+    </form>
+    <div id="updateFarmMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">Delete Farm</h3>
+    <form id="deleteFarmForm">
+        Farm ID: 
+        <input type="number" id="deleteFarmID" placeholder="e.g., 101" min="1" required> <br><br>
+
+        <button type="submit">Delete Farm</button>
+    </form>
+    <div id="deleteFarmMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+
+    <h3 style="margin-top: 20px;">View All Farms</h3>
+    <button id="viewFarms">Refresh Farms</button>
+    <table id="farmsTable" border="1" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Farm ID</th>
+                <th>Farm Name</th>
+                <th>Location</th>
+                <th>Farmer ID</th>
+                <th>Farmer Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Fields Section -->
+    <h2>Fields</h2>
+    
+    <h3>Add New Field</h3>
+    <form id="addFieldForm">
+        Field ID: <input type="number" id="fieldID" placeholder="e.g., 1001" required> <br><br>
+        Farm ID: <input type="number" id="fieldFarmID" placeholder="e.g., 101" required> <br><br>
+        Area (acres): <input type="number" id="fieldArea" placeholder="e.g., 50"> <br><br>
+        <button type="submit">Add Field</button>
+    </form>
+    <div id="fieldMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">View All Fields</h3>
+    <button id="viewFields">Refresh Fields</button>
+    <table id="fieldsTable" border="1" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Field ID</th>
+                <th>Farm ID</th>
+                <th>Area (acres)</th>
+                <th>Farm Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Crops Section -->
+    <h2>Crops</h2>
+    
+    <h3>Add New Crop</h3>
+    <form id="addCropForm">
+        Crop ID: <input type="number" id="cropID" placeholder="e.g., 5001" required> <br><br>
+        Field ID: <input type="number" id="cropFieldID" placeholder="e.g., 1001" required> <br><br>
+        Crop Name: <input type="text" id="cropName" placeholder="e.g., Wheat" required> <br><br>
+        Planting Date: <input type="date" id="cropPlantDate" required> <br><br>
+        Harvest Date: <input type="date" id="cropHarvestDate" required> <br><br>
+        Season: <input type="text" id="cropSeason" placeholder="e.g., Spring" required> <br><br>
+        <button type="submit">Add Crop</button>
+    </form>
+    <div id="cropMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">View All Crops</h3>
+    <button id="viewCrops">Refresh Crops</button>
+    <table id="cropsTable" border="1" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Crop ID</th>
+                <th>Field ID</th>
+                <th>Crop Name</th>
+                <th>Planting Date</th>
+                <th>Harvest Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- CropYield Table -->
+    <h2>Crop Yields</h2>
+    <h3>Add Crop Yield</h3>
+    <form id="addYieldForm">
+        Crop ID: <input type="number" id="yieldCropID" placeholder="e.g., 5001" required> <br><br>
+        Total Yield: <input type="number" step="0.01" id="yieldTotal" placeholder="e.g., 1250.50" required> <br><br>
+        Health Rating: <input type="number" id="yieldHealth" placeholder="e.g., 8" required> <br><br>
+        <button type="submit">Add Yield</button>
+    </form>
+    <div id="yieldMsg" style="margin-top: 10px; font-weight: bold;"></div>
+    <h3>View Crop Yields</h3>
+    <button id="viewYields">Refresh</button>
+    <table id="yieldsTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Crop ID</th><th>Total Yield</th><th>Health Rating</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Grain Table -->
+    <h2>Grains</h2>
+    <h3>Add Grain</h3>
+    <form id="addGrainForm">
+        Crop ID: <input type="number" id="grainCropID" placeholder="e.g., 5001" required> <br><br>
+        Gluten Content: <input type="number" step="0.01" id="grainGluten" placeholder="e.g., 12.5"> <br><br>
+        <button type="submit">Add Grain</button>
+    </form>
+    <div id="grainMsg" style="margin-top: 10px; font-weight: bold;"></div>
+    <h3>View Grains</h3>
+    <button id="viewGrains">Refresh</button>
+    <table id="grainsTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Crop ID</th><th>Gluten Content</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Vegetable Table -->
+    <h2>Vegetables</h2>
+    <h3>Add Vegetable</h3>
+    <form id="addVegetableForm">
+        Crop ID: <input type="number" id="vegCropID" placeholder="e.g., 5003" required> <br><br>
+        Is Leafy: <select id="vegIsLeafy" required>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select> <br><br>
+        <button type="submit">Add Vegetable</button>
+    </form>
+    <div id="vegMsg" style="margin-top: 10px; font-weight: bold;"></div>
+    <h3>View Vegetables</h3>
+    <button id="viewVegetables">Refresh</button>
+    <table id="vegetablesTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Crop ID</th><th>Is Leafy</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Fruit Table -->
+    <h2>Fruits</h2>
+    <h3>Add Fruit</h3>
+    <form id="addFruitForm">
+        Crop ID: <input type="number" id="fruitCropID" placeholder="e.g., 5002" required> <br><br>
+        Sugar Content: <input type="number" step="0.01" id="fruitSugar" placeholder="e.g., 15.75"> <br><br>
+        <button type="submit">Add Fruit</button>
+    </form>
+    <div id="fruitMsg" style="margin-top: 10px; font-weight: bold;"></div>
+    <h3>View Fruits</h3>
+    <button id="viewFruits">Refresh</button>
+    <table id="fruitsTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Crop ID</th><th>Sugar Content</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Pesticides Section -->
+    <h2>Pesticides</h2>
+    
+    <h3>Add New Pesticide</h3>
+    <form id="addPesticideForm">
+        Pesticide ID: <input type="number" id="pestID" placeholder="e.g., 1" required> <br><br>
+        Name: <input type="text" id="pestName" placeholder="e.g., Organic Spray A" required> <br><br>
+        <button type="submit">Add Pesticide</button>
+    </form>
+    <div id="pestMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">View All Pesticides</h3>
+    <button id="viewPesticides">Refresh Pesticides</button>
+    <table id="pesticidesTable" border="1" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Pesticide ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Soil Records Table -->
+    <h2>Soil Records</h2>
+    <h3>Add Soil Record</h3>
+    <form id="addSoilForm">
+        Soil Condition ID: <input type="number" id="soilCondID" placeholder="e.g., 1" required> <br><br>
+        Field ID: <input type="number" id="soilFieldID" placeholder="e.g., 1001" required> <br><br>
+        Sample Date: <input type="date" id="soilDate" required> <br><br>
+        pH: <input type="number" step="0.01" id="soilPH" placeholder="e.g., 6.5" required> <br><br>
+        Moisture: <input type="number" step="0.01" id="soilMoisture" placeholder="e.g., 22.5" required> <br><br>
+        <button type="submit">Add Record</button>
+    </form>
+    <div id="soilMsg" style="margin-top: 10px; font-weight: bold;"></div>
+    <h3>View Soil Records</h3>
+    <button id="viewSoil">Refresh</button>
+    <table id="soilTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Soil Condition ID</th><th>Field ID</th><th>Sample Date</th><th>pH</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Moisture By Chemistry Table -->
+    <h2>Moisture By Chemistry</h2>
+    <h3>View Moisture Data</h3>
+    <button id="viewMoisture">Refresh</button>
+    <table id="moistureTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Sample Date</th><th>pH</th><th>Moisture</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Irrigation Records Table -->
+    <h2>Irrigation Records</h2>
+    <h3>Add Irrigation Record</h3>
+    <form id="addIrrigationForm">
+        Irrigation ID: <input type="number" id="irrigID" placeholder="e.g., 1" required> <br><br>
+        Field ID: <input type="number" id="irrigFieldID" placeholder="e.g., 1001" required> <br><br>
+        Event Date: <input type="date" id="irrigDate"> <br><br>
+        Volume: <input type="number" step="0.01" id="irrigVolume" placeholder="e.g., 500.00"> <br><br>
+        <button type="submit">Add Record</button>
+    </form>
+    <div id="irrigMsg" style="margin-top: 10px; font-weight: bold;"></div>
+    <h3>View Irrigation Records</h3>
+    <button id="viewIrrigation">Refresh</button>
+    <table id="irrigationTable" border="1" style="margin-top: 10px;">
+        <thead><tr><th>Irrigation ID</th><th>Field ID</th><th>Event Date</th><th>Volume</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <br><hr><br> <!-- ========================================================================= -->
+
+    <!-- Certifications Section -->
+    <h2>Certifications</h2>
+    
+    <h3>Add New Certification</h3>
+    <form id="addCertForm">
+        Certification ID: <input type="number" id="certID" placeholder="e.g., 1" required> <br><br>
+        Name: <input type="text" id="certName" placeholder="e.g., Organic Certified" required> <br><br>
+        Awarded Date: <input type="date" id="certAwardDate" required> <br><br>
+        Expiry Date: <input type="date" id="certExpiryDate" required> <br><br>
+        Farm ID: <input type="number" id="certFarmID" placeholder="e.g., 101" required> <br><br>
+        <button type="submit">Add Certification</button>
+    </form>
+    <div id="certMsg" style="margin-top: 10px; font-weight: bold;"></div>
+
+    <h3 style="margin-top: 20px;">View All Certifications</h3>
+    <button id="viewCertifications">Refresh Certifications</button>
+    <table id="certificationsTable" border="1" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Certification ID</th>
+                <th>Name</th>
+                <th>Awarded Date</th>
+                <th>Expiry Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <!-- ===================================================================================== -->
+    <!-- External JavaScript file that contains the functionality/logic for the operations above. -->
+    <script src="scripts.js"></script>
+</body>
+</html>

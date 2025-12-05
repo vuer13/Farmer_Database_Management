@@ -1,4 +1,4 @@
-# CPSC 304 - Farm Management Database
+# Farm Management Database
 
 ## Template Code Notice
 This project builds on template code that was supplied as part of the assignment.  
